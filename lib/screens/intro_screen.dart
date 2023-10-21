@@ -8,7 +8,7 @@ class IntroScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Catch Spot')),
-      bottomNavigationBar: MenuBottom(),
+      bottomNavigationBar: MenuBottom(100),
     );
   }
 }

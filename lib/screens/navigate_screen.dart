@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 
+import '../main.dart';
+
 class NavigateScreen extends StatelessWidget {
   const NavigateScreen({Key? key}) : super(key: key);
 
@@ -21,7 +23,7 @@ class NavigateScreen extends StatelessWidget {
         ),
       ),
       body: Center(child: Text("Navigate")),
-      bottomNavigationBar: MenuBottom(),
+      bottomNavigationBar: MenuBottom(0),
     );
   }
 }

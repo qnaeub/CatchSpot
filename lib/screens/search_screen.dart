@@ -25,31 +25,33 @@ class _SearchScreenState extends State<SearchScreen> {
           automaticallyImplyLeading: false,
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            width: 330,
-            height: 50,
-            margin: EdgeInsets.all(25),
-            padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-            decoration: BoxDecoration(
-                color: Color(0xffFFFFFF),
-                border: Border.all(color: Color(0xffA076F9), width: 1),
-                borderRadius: BorderRadius.circular(30)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Icon(Icons.mic),
-                Icon(Icons.search),
-              ],
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            Container(
+              // width: 330,
+              height: 50,
+              margin: EdgeInsets.fromLTRB(15, 25, 15, 0),
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+              decoration: BoxDecoration(
+                  color: Color(0xffFFFFFF),
+                  border: Border.all(color: Color(0xffA076F9), width: 1),
+                  borderRadius: BorderRadius.circular(30)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Icon(Icons.mic),
+                  Icon(Icons.search),
+                ],
+              ),
             ),
-          ),
-          Container(
-              margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
-              child: Text('주차장을 검색하세요.')),
-        ],
+            Container(
+                margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
+                child: Text('주차장을 검색하세요.')),
+          ],
+        ),
       ),
-      bottomNavigationBar: MenuBottom(),
+      bottomNavigationBar: MenuBottom(1),
     );
   }
 }

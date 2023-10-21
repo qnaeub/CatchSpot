@@ -14,14 +14,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        //theme: ThemeData(primarySwatch: Colors.purple),
-        routes: {
-          '/navigate': (context) => NavigateScreen(),
-          '/search': (context) => SearchScreen(),
-          '/manage': (context) => ManageScreen()
-        },
-        home: SearchScreen()
-        //initialRoute: '/'
-        );
+      //theme: ThemeData(primarySwatch: Colors.purple),
+      routes: {
+        '/navigate': (context) => NavigateScreen(),
+        '/search': (context) => SearchScreen(),
+        '/manage': (context) => ManageScreen()
+      },
+      debugShowCheckedModeBanner: false,
+      home: SearchScreen(),
+      //initialRoute: '/'
+    );
   }
 }

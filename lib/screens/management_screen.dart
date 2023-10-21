@@ -21,7 +21,7 @@ class ManageScreen extends StatelessWidget {
         ),
       ),
       body: Center(child: Text("Management")),
-      bottomNavigationBar: MenuBottom(),
+      bottomNavigationBar: MenuBottom(2),
     );
   }
 }
