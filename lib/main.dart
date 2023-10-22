@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         '/setinfo': (context) => SetReserveInfo()
       },
       debugShowCheckedModeBanner: false,
-      home: ParkingSpaceScreen(),
+      home: IntroScreen(),
       //initialRoute: '/'
     );
   }

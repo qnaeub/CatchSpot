@@ -51,7 +51,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     iconSize: 25.0,
                   ),
                   SizedBox(
-                    width: 260.0,
+                    width: 200.0,
                     child: TextField(
                       cursorColor: Color(0xffA076F9),
                       controller: textController,
