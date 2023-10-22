@@ -28,8 +28,6 @@ class MenuBottomState extends State<MenuBottom> {
       onTap: (index) {
         setState(() {
           _currentIndex = index;
-          // pagecontroller.jumpToPage(index);
-          print(index);
         });
         switch (index) {
           case 0:

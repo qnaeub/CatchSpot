@@ -66,6 +66,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     onPressed: () {
                       // 검색 실행할 시 실행할 로직
                       // 저장된 텍스트는 textController.text 로 접근 가능
+                      Navigator.pushNamed(context, '/parking-space');
                     },
                     iconSize: 25.0,
                   ),

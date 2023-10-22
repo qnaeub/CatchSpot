@@ -21,7 +21,8 @@ class MyApp extends StatelessWidget {
         '/navigate': (context) => NavigateScreen(),
         '/search': (context) => SearchScreen(),
         '/manage': (context) => ManageScreen(),
-        '/setinfo': (context) => SetReserveInfo()
+        '/setinfo': (context) => SetReserveInfo(),
+        '/parking-space': (context) => ParkingSpaceScreen(),
       },
       debugShowCheckedModeBanner: false,
       home: IntroScreen(),
