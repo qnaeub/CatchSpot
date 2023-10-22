@@ -4,6 +4,7 @@ import 'package:flutter_app/screens/management_screen.dart';
 import 'package:flutter_app/screens/navigate_screen.dart';
 import 'package:flutter_app/screens/parkingSpace_screen.dart';
 import 'package:flutter_app/screens/search_screen.dart';
+import 'package:flutter_app/screens/setReserveInfo.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,8 @@ class MyApp extends StatelessWidget {
       routes: {
         '/navigate': (context) => NavigateScreen(),
         '/search': (context) => SearchScreen(),
-        '/manage': (context) => ManageScreen()
+        '/manage': (context) => ManageScreen(),
+        '/setinfo': (context) => SetReserveInfo()
       },
       debugShowCheckedModeBanner: false,
       home: ParkingSpaceScreen(),
