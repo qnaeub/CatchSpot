@@ -5,6 +5,7 @@ import 'package:flutter_app/screens/navigate_screen.dart';
 import 'package:flutter_app/screens/parkingSpace_screen.dart';
 import 'package:flutter_app/screens/search_screen.dart';
 import 'package:flutter_app/screens/setReserveInfo.dart';
+import 'package:flutter_app/screens/finishReserve.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         '/manage': (context) => ManageScreen(),
         '/setinfo': (context) => SetReserveInfo(),
         '/parking-space': (context) => ParkingSpaceScreen(),
+        '/finish-reserve': (context) => FinishReserve(),
       },
       debugShowCheckedModeBanner: false,
       home: IntroScreen(),
