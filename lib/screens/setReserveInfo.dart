@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/screens/management_screen.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SetReserveInfo extends StatefulWidget {
   const SetReserveInfo({Key? key}) : super(key: key);
@@ -12,7 +14,41 @@ class SetReserveInfo extends StatefulWidget {
 class _SetReserveInfoState extends State<SetReserveInfo> {
   final String now = new DateTime.now().toString();
   String formattedDate = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
-  TextEditingController textController = TextEditingController();
+
+  // 차량번호, 전화번호 저장
+  late SharedPreferences _pref;
+  String _carnum = "";
+  String _phonenum = "";
+  TextEditingController _carnumController = TextEditingController();
+  TextEditingController _phonenumController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _getCarAndPhonenum();
+  }
+
+  _saveCarnum() {
+    setState(() {
+      _carnum = _carnumController.text;
+      _pref.setString("currentCarnum", _carnum);
+    });
+  }
+
+  _savePhonenum() {
+    setState(() {
+      _phonenum = _phonenumController.text;
+      _pref.setString("currentPhonenum", _phonenum);
+    });
+  }
+
+  _getCarAndPhonenum() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _carnum = _pref.getString("currentCarnum") ?? "";
+      _phonenum = _pref.getString("currentPhonenum") ?? "";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,10 +131,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                       width: 200.0,
                       child: TextField(
                         cursorColor: Color(0xffA076F9),
-                        controller: textController,
+                        controller: _carnumController,
                         style: TextStyle(),
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          hintText: "123가 4568",
                         ),
                       ),
                     ),
@@ -117,7 +154,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                     ),
                   ),
                   Container(
-                    // 차량번호 입력칸
+                    // 전화번호 입력칸
                     width: 270,
                     height: 35,
                     margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -130,10 +167,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                       width: 200.0,
                       child: TextField(
                         cursorColor: Color(0xffA076F9),
-                        controller: textController,
+                        controller: _phonenumController,
                         style: TextStyle(),
                         decoration: InputDecoration(
                           border: InputBorder.none,
+                          hintText: "01012345678",
                         ),
                       ),
                     ),
@@ -147,12 +185,31 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
               margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
               child: InkWell(
                   onTap: () {
-                    // 예약 완료 페이지로 이동
-                    Navigator.pushNamed(context, '/finish-reserve');
+                    // 차량번호, 전화번호 데이터 저장
+                    _saveCarnum();
+                    _savePhonenum();
+                    // 차량번호, 전화번호 데이터 저장 확인
+                    print("local 차량번호: $_carnum");
+                    print("local 전화번호: $_phonenum");
+
+                    if (_carnum == "" || _phonenum == "") {
+                      // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text("차량번호와 전화번호를 반드시 입력해야 합니다."),
+                          );
+                        },
+                      );
+                    } else {
+                      // 예약 완료 페이지로 이동
+                      Navigator.pushNamed(context, '/finish-reserve');
+                    }
                   },
                   child: Container(
                     // 실시간 예약하기 버튼
-                    // 차량번호, 전화번호 데이터 넘겨주기
                     height: 50,
                     decoration: BoxDecoration(
                       color: Color(0xffFFFFFF),
