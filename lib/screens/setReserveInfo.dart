@@ -36,16 +36,16 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _carnum = _carnumController.text;
       _phonenum = _phonenumController.text;
-      _pref.setString("currentCarnum", _carnum);
-      _pref.setString("currentPhonenum", _phonenum);
+      _pref.setString("carnum", _carnum);
+      _pref.setString("phonenum", _phonenum);
     });
   }
 
   _getCarAndPhonenum() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
-      _carnum = _pref.getString("currentCarnum") ?? "";
-      _phonenum = _pref.getString("currentPhonenum") ?? "";
+      _carnum = _pref.getString("carnum") ?? "";
+      _phonenum = _pref.getString("phonenum") ?? "";
     });
   }
 

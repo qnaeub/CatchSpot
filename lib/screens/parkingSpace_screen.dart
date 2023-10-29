@@ -34,8 +34,8 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   _getCarAndPhonenum() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
-      _carnum = _pref.getString("currentCarnum") ?? "";
-      _phonenum = _pref.getString("currentPhonenum") ?? "";
+      _carnum = _pref.getString("carnum") ?? "";
+      _phonenum = _pref.getString("phonenum") ?? "";
     });
   }
 
@@ -71,186 +71,193 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
         builder: (context, value, child) {
           return Column(
             children: <Widget>[
-              Container(
-                // 주차장 이름 & 변경 버튼
-                height: 30,
-                margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                child: Row(
-                  children: [
-                    Icon(Icons.location_pin),
-                    Spacer(flex: 1),
-                    Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
-                    Spacer(flex: 20),
-                    InkWell(
-                      onTap: () {
-                        // 주차장 선택 페이지로 이동
-                        Navigator.pushNamed(context, '/search');
-                      },
-                      child: Container(
-                        // 변경 버튼
-                        width: 55,
-                        height: 30,
-                        decoration: BoxDecoration(
-                            color: Color(0xffFFFFFF),
-                            border: Border.all(color: Color(0xffA076F9)),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Center(child: Text("변경")),
+              Expanded(
+                  child: SingleChildScrollView(
+                      child: Column(
+                children: <Widget>[
+                  Container(
+                    // 주차장 이름 & 변경 버튼
+                    height: 30,
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.location_pin),
+                        Spacer(flex: 1),
+                        Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
+                        Spacer(flex: 20),
+                        InkWell(
+                          onTap: () {
+                            // 주차장 선택 페이지로 이동
+                            Navigator.pushNamed(context, '/search');
+                          },
+                          child: Container(
+                            // 변경 버튼
+                            width: 55,
+                            height: 30,
+                            decoration: BoxDecoration(
+                                color: Color(0xffFFFFFF),
+                                border: Border.all(color: Color(0xffA076F9)),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Center(child: Text("변경")),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Container(
+                    // 날짜 및 시각 선택
+                    height: 30,
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    child: Row(children: [
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints:
+                            BoxConstraints(), // padding, constraints >> IconButton의 자체 여백 없애는 요소
+                        icon: Icon(Icons.calendar_month),
+                        onPressed: () {
+                          selectedDate.value = true;
+                        },
+                      ),
+                      Spacer(flex: 1),
+                      InkWell(
+                          onTap: () {
+                            // 날짜 변경
+                          },
+                          child: Text("$formattedDate") // 현재시각
+                          ),
+                      Spacer(flex: 20),
+                    ]),
+                  ),
+                  if (!selectedDate.value)
+                    Container(
+                      // 주차장 도면
+                      width: double.infinity,
+                      height: 390,
+                      margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
+                      decoration: BoxDecoration(color: Color(0xffF5F5F5)),
+                      clipBehavior: Clip.hardEdge,
+                      child: Column(
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff98F976),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffD9D9D9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff98F976),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xff98F976),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 50,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffD9D9D9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffD9D9D9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffD9D9D9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              Spacer(),
+                              Container(
+                                width: 90,
+                                height: 150,
+                                decoration: BoxDecoration(
+                                  color: Color(0xffD9D9D9),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     )
-                  ],
-                ),
-              ),
-              Container(
-                // 날짜 및 시각 선택
-                height: 30,
-                margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                child: Row(children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints:
-                        BoxConstraints(), // padding, constraints >> IconButton의 자체 여백 없애는 요소
-                    icon: Icon(Icons.calendar_month),
-                    onPressed: () {
-                      selectedDate.value = true;
-                    },
-                  ),
-                  Spacer(flex: 1),
-                  InkWell(
-                      onTap: () {
-                        // 날짜 변경
-                      },
-                      child: Text("$formattedDate") // 현재시각
-                      ),
-                  Spacer(flex: 20),
-                ]),
-              ),
-              if (!selectedDate.value)
-                Container(
-                  // 주차장 도면
-                  width: double.infinity,
-                  height: 390,
-                  margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
-                  decoration: BoxDecoration(color: Color(0xffF5F5F5)),
-                  clipBehavior: Clip.hardEdge,
-                  child: Column(
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xff98F976),
-                              borderRadius: BorderRadius.circular(10),
+                  else
+                    Container(
+                      margin: EdgeInsets.only(top: 25.0),
+                      child: SizedBox(
+                          width: double.infinity,
+                          height: 465.0,
+                          child: DecoratedBox(
+                            child: Column(
+                              children: [
+                                Text("달력 라이브러리"),
+                                // 임시로 텍스트 버튼으로 만들었어여...
+                                TextButton(
+                                    onPressed: (() {
+                                      Navigator.pushNamed(
+                                          context, '/parking-space');
+                                    }),
+                                    child: Text("오늘 날짜 선택한다면")),
+                                TextButton(
+                                    onPressed: (() {
+                                      Navigator.pushNamed(
+                                          context, '/pre-reservation');
+                                    }),
+                                    child: Text("다른 날짜 선택한다면"))
+                              ],
                             ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
                             decoration: BoxDecoration(
-                              color: Color(0xffD9D9D9),
-                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.grey,
                             ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xff98F976),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xff98F976),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        height: 50,
-                      ),
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xffD9D9D9),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xffD9D9D9),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xffD9D9D9),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          Spacer(),
-                          Container(
-                            width: 90,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              color: Color(0xffD9D9D9),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Container(
-                  margin: EdgeInsets.only(top: 25.0),
-                  child: SizedBox(
-                      width: double.infinity,
-                      height: 465.0,
-                      child: DecoratedBox(
-                        child: Column(
-                          children: [
-                            Text("여기에 SizedBox 대신 달력 라이브러리 넣으시면 됩니당"),
-                            // 임시로 텍스트 버튼으로 만들었어여...
-                            TextButton(
-                                onPressed: (() {
-                                  Navigator.pushNamed(context, '/setinfo');
-                                }),
-                                child: Text("오늘 날짜 선택한다면")),
-                            TextButton(
-                                onPressed: (() {
-                                  Navigator.pushNamed(
-                                      context, '/pre-reservation');
-                                }),
-                                child: Text("다른 날짜 선택한다면"))
-                          ],
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                        ),
-                      )),
-                ),
+                          )),
+                    ),
+                ],
+              ))),
               if (_carnum != "" && _phonenum != "")
                 Container(
                     height: 50,
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
                     child: Container(
                       // 주차 예약하기 버튼
                       //width: double.infinity,
@@ -265,7 +272,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
               else
                 Container(
                     height: 50,
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
                     child: InkWell(
                         onTap: () {
                           // 주차 예약하기 페이지로 이동
@@ -302,12 +309,23 @@ class _PreReservationState extends State<PreReservation> {
   ValueNotifier<int> currentPage =
       ValueNotifier<int>(1); // <사전 예약> 위젯에서는 현재 페이지를 변수로 저장하여 왔다 갔다 할 수 있도록 했어요
   late SharedPreferences _pref;
+  String _carnum = "";
+  String _phonenum = "";
   String _parkingLot = "";
 
   @override
   void initState() {
     super.initState();
     _getParkingLot();
+    _getCarAndPhonenum();
+  }
+
+  _getCarAndPhonenum() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _carnum = _pref.getString("carnum") ?? "";
+      _phonenum = _pref.getString("phonenum") ?? "";
+    });
   }
 
   _getParkingLot() async {
@@ -341,191 +359,217 @@ class _PreReservationState extends State<PreReservation> {
           builder: (context, value, child) {
             return Column(
               children: [
-                Container(
-                  // 주차장 이름 & 변경 버튼
-                  height: 30,
-                  margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                  child: Row(
+                Expanded(
+                    child: SingleChildScrollView(
+                  child: Column(
                     children: [
-                      Icon(Icons.location_pin),
-                      Spacer(flex: 1),
-                      Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
-                      Spacer(flex: 20),
-                      InkWell(
-                        onTap: () {
-                          // 주차장 선택 페이지로 이동
-                          Navigator.pushNamed(context, '/search');
-                        },
-                        child: Container(
-                          // 변경 버튼
-                          width: 55,
-                          height: 30,
-                          decoration: BoxDecoration(
-                              color: Color(0xffFFFFFF),
-                              border: Border.all(color: Color(0xffA076F9)),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Center(child: Text("변경")),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Container(
-                  // 날짜 및 시각 선택
-                  height: 30,
-                  margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                  child: Row(children: [
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints:
-                          BoxConstraints(), // padding, constraints >> IconButton의 자체 여백 없애는 요소
-                      icon: Icon(Icons.calendar_month),
-                      onPressed: () {},
-                    ),
-                    Spacer(flex: 1),
-                    InkWell(
-                        onTap: () {
-                          // 날짜 변경
-                        },
-                        child: Text("$formattedDate") // 현재시각
-                        ),
-                    Spacer(flex: 20),
-                  ]),
-                ),
-                if (currentPage.value == 1)
-                  Container(
-                    margin: EdgeInsets.only(top: 25.0),
-                    child: SizedBox(
-                        width: double.infinity,
-                        height: 465.0,
-                        child: Column(
+                      Container(
+                        // 주차장 이름 & 변경 버튼
+                        height: 30,
+                        margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                        child: Row(
                           children: [
-                            Container(
-                              width: double.infinity,
-                              height: 74.0,
-                              decoration: BoxDecoration(
-                                  border: Border(
-                                top: BorderSide(
-                                    width: 1.0, color: Color(0xffD9D9D9)),
-                                bottom: BorderSide(
-                                    width: 1.0, color: Color(0xffD9D9D9)),
-                              )),
-                              child: Center(
-                                child: Text("선택한 날짜 들어갈 자리",
-                                    style: TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                    )),
-                              ),
-                            ),
-                            Container(
-                              width: double.infinity,
-                              height: 391.0,
-                              decoration: BoxDecoration(
-                                  border: Border(
-                                bottom: BorderSide(
-                                    width: 1.0, color: Color(0xffD9D9D9)),
-                              )),
-                              child: Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                      "여기 시간 선택 라이브러리.. 간격은 라이브러리 넣고 조정해야 할 듯함 (무책임)"),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Container(
-                                        width: 100.0,
-                                        height: 50.0,
-                                        child: OutlinedButton(
-                                            onPressed: () {
-                                              // Navigator.pushNamed(
-                                              //     context, '/parking-space');
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ParkingSpaceScreen(
-                                                            data: ValueNotifier<
-                                                                bool>(true))),
-                                              );
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              side: BorderSide(
-                                                color: Color(0xffA076F9),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              "이전",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 20.0),
-                                            )),
-                                      ),
-                                      Container(
-                                        width: 100.0,
-                                        height: 50.0,
-                                        child: OutlinedButton(
-                                            onPressed: () {
-                                              currentPage.value = 2;
-                                            },
-                                            style: OutlinedButton.styleFrom(
-                                              side: BorderSide(
-                                                color: Color(0xffA076F9),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              "다음",
-                                              style: TextStyle(
-                                                  color: Colors.black,
-                                                  fontSize: 20.0),
-                                            )),
-                                      )
-                                    ],
-                                  )
-                                ],
+                            Icon(Icons.location_pin),
+                            Spacer(flex: 1),
+                            Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
+                            Spacer(flex: 20),
+                            InkWell(
+                              onTap: () {
+                                // 주차장 선택 페이지로 이동
+                                Navigator.pushNamed(context, '/search');
+                              },
+                              child: Container(
+                                // 변경 버튼
+                                width: 55,
+                                height: 30,
+                                decoration: BoxDecoration(
+                                    color: Color(0xffFFFFFF),
+                                    border:
+                                        Border.all(color: Color(0xffA076F9)),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Center(child: Text("변경")),
                               ),
                             )
                           ],
-                        )),
-                  )
-                else if (currentPage.value == 2)
-                  Container(
-                      // 주차장 도면
-                      width: double.infinity,
-                      height: 390,
-                      margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
-                      decoration: BoxDecoration(color: Color(0xffF5F5F5)),
-                      clipBehavior: Clip.hardEdge,
-                      child: Text("도면 들어가야 돼요~"))
-                else if (currentPage.value == 3)
-                  Container(),
-                Container(
-                    height: 50,
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                    child: InkWell(
-                        onTap: () {
-                          // 단순 경로 이동이 아닌 인자를 같이 전달해야 할 경우 이렇게 전달하면 된다고 합니다
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SetReserveInfo(
-                                    realTime: ValueNotifier<bool>(false))),
-                          );
-                        },
-                        child: Container(
-                          // 주차 예약하기 버튼
-                          //width: double.infinity,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Color(0xffFFFFFF),
-                            border: Border.all(color: Color(0xffA076F9)),
-                            borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      Container(
+                        // 날짜 및 시각 선택
+                        height: 30,
+                        margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                        child: Row(children: [
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints:
+                                BoxConstraints(), // padding, constraints >> IconButton의 자체 여백 없애는 요소
+                            icon: Icon(Icons.calendar_month),
+                            onPressed: () {},
                           ),
-                          child: Center(child: Text("주차 예약하기")),
-                        ))),
+                          Spacer(flex: 1),
+                          InkWell(
+                              onTap: () {
+                                // 날짜 변경
+                              },
+                              child: Text("$formattedDate") // 현재시각
+                              ),
+                          Spacer(flex: 20),
+                        ]),
+                      ),
+                      if (currentPage.value == 1)
+                        Container(
+                          margin: EdgeInsets.only(top: 25.0),
+                          child: SizedBox(
+                              width: double.infinity,
+                              height: 465.0,
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width: double.infinity,
+                                    height: 74.0,
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                      top: BorderSide(
+                                          width: 1.0, color: Color(0xffD9D9D9)),
+                                      bottom: BorderSide(
+                                          width: 1.0, color: Color(0xffD9D9D9)),
+                                    )),
+                                    child: Center(
+                                      child: Text("선택한 날짜 들어갈 자리",
+                                          style: TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.bold,
+                                          )),
+                                    ),
+                                  ),
+                                  Container(
+                                    width: double.infinity,
+                                    height: 391.0,
+                                    decoration: BoxDecoration(
+                                        border: Border(
+                                      bottom: BorderSide(
+                                          width: 1.0, color: Color(0xffD9D9D9)),
+                                    )),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        Text("시간 선택 라이브러리"),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Container(
+                                              width: 100.0,
+                                              height: 50.0,
+                                              child: OutlinedButton(
+                                                  onPressed: () {
+                                                    // Navigator.pushNamed(
+                                                    //     context, '/parking-space');
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                          builder: (context) =>
+                                                              ParkingSpaceScreen(
+                                                                  data: ValueNotifier<
+                                                                          bool>(
+                                                                      true))),
+                                                    );
+                                                  },
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                    side: BorderSide(
+                                                      color: Color(0xffA076F9),
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    "이전",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 20.0),
+                                                  )),
+                                            ),
+                                            Container(
+                                              width: 100.0,
+                                              height: 50.0,
+                                              child: OutlinedButton(
+                                                  onPressed: () {
+                                                    currentPage.value = 2;
+                                                  },
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                    side: BorderSide(
+                                                      color: Color(0xffA076F9),
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    "다음",
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 20.0),
+                                                  )),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              )),
+                        )
+                      else if (currentPage.value == 2)
+                        Container(
+                            // 주차장 도면
+                            width: double.infinity,
+                            height: 390,
+                            margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
+                            decoration: BoxDecoration(color: Color(0xffF5F5F5)),
+                            clipBehavior: Clip.hardEdge,
+                            child: Text("사전 예약 구역 도면"))
+                      else if (currentPage.value == 3)
+                        Container(),
+                    ],
+                  ),
+                )),
+                if (_carnum != "" && _phonenum != "")
+                  Container(
+                      height: 50,
+                      margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      child: Container(
+                        // 주차 예약하기 버튼
+                        //width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Color(0xffFFFFFF),
+                          border: Border.all(color: Color(0xffD9D9D9)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(child: Text("주차 예약하기")),
+                      ))
+                else
+                  Container(
+                      height: 50,
+                      margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      child: InkWell(
+                          onTap: () {
+                            // 단순 경로 이동이 아닌 인자를 같이 전달해야 할 경우 이렇게 전달하면 된다고 합니다
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SetReserveInfo(
+                                      realTime: ValueNotifier<bool>(false))),
+                            );
+                          },
+                          child: Container(
+                            // 주차 예약하기 버튼
+                            //width: double.infinity,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xffFFFFFF),
+                              border: Border.all(color: Color(0xffA076F9)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(child: Text("주차 예약하기")),
+                          ))),
               ],
             );
           }),
