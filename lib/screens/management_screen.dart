@@ -50,6 +50,80 @@ class _ManageScreenState extends State<ManageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget childWidget;
+
+    if (_carnum != "" && _phonenum != "") {
+      childWidget = Column(
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    decoration: BoxDecoration(
+                      color: Color(0xffFFFFFF),
+                      border: Border.all(color: Color(0xffD9D9D9), width: 1),
+                    ),
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                          // 차량번호
+                          height: 30,
+                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                          child: Row(
+                            children: [
+                              Icon(Icons.directions_car),
+                              Spacer(flex: 1),
+                              Text("$_carnum"),
+                              Spacer(flex: 20),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          // 전화번호
+                          height: 30,
+                          margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                          child: Row(
+                            children: [
+                              Icon(Icons.call),
+                              Spacer(flex: 1),
+                              Text("$_phonenum"),
+                              Spacer(flex: 20),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+              height: 50,
+              margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+              child: InkWell(
+                onTap: () {
+                  _cancelReserve();
+                  Navigator.pushNamed(context, '/manage');
+                },
+                child: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Color(0xffFFFFFF),
+                    border: Border.all(color: Color(0xffA076F9)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(child: Text("예약 취소하기")),
+                ),
+              ))
+        ],
+      );
+    } else {
+      childWidget = Center(child: Text("예약된 주차장이 없습니다."));
+    }
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50),
@@ -64,77 +138,7 @@ class _ManageScreenState extends State<ManageScreen> {
           automaticallyImplyLeading: false,
         ),
       ),
-      body: Container(
-          child: Column(
-        children: <Widget>[
-          if (_carnum != "" && _phonenum != "") ...[
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                      decoration: BoxDecoration(
-                        color: Color(0xffFFFFFF),
-                        border: Border.all(color: Color(0xffD9D9D9), width: 1),
-                      ),
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            // 차량번호
-                            height: 30,
-                            margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                            child: Row(
-                              children: [
-                                Icon(Icons.directions_car),
-                                Spacer(flex: 1),
-                                Text("$_carnum"),
-                                Spacer(flex: 20),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            // 전화번호
-                            height: 30,
-                            margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
-                            child: Row(
-                              children: [
-                                Icon(Icons.call),
-                                Spacer(flex: 1),
-                                Text("$_phonenum"),
-                                Spacer(flex: 20),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-                height: 50,
-                margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
-                child: InkWell(
-                  onTap: () {
-                    _cancelReserve();
-                    Navigator.pushNamed(context, '/manage');
-                  },
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Color(0xffFFFFFF),
-                      border: Border.all(color: Color(0xffA076F9)),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(child: Text("예약 취소하기")),
-                  ),
-                ))
-          ] else
-            Center(child: Text("예약된 주차장이 없습니다.")),
-        ],
-      )),
+      body: childWidget,
       bottomNavigationBar: MenuBottom(2),
     );
   }

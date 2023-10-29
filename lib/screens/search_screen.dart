@@ -23,9 +23,11 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   static List<dynamic> parkingLotList = [];
   static List<String> lotNames = [];
+  static List<int> lotKeys = [];
   late SharedPreferences _pref;
   String _searchItem = "";
   String _parkingLot = "";
+  int _lotKey = -999;
   TextEditingController textController = TextEditingController();
   bool showSearchResult = false;
 
@@ -53,6 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
   _setParkingLot() async {
     setState(() {
       _pref.setString("parkingLot", _parkingLot);
+      _pref.setInt("lotKey", _lotKey);
     });
   }
 
@@ -60,6 +63,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
+      _lotKey = _pref.getInt("lotKey") ?? -999;
     });
   }
 
@@ -70,9 +74,12 @@ class _SearchScreenState extends State<SearchScreen> {
       setState(() {
         parkingLotList = response.data['resultData'];
         lotNames = [];
+        lotKeys = [];
         for (var item in parkingLotList) {
           String lotName = item['lot_name'];
+          int lotKey = item['lot_key'];
           lotNames.add(lotName);
+          lotKeys.add(lotKey);
         }
       });
     } else {
@@ -161,8 +168,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         onTap: () {
                           // 선택한 주차장 로컬에 저장
                           _parkingLot = lotNames[index];
+                          _lotKey = lotKeys[index];
                           _setParkingLot();
-                          print("선택한 주차장: ${_parkingLot}");
+                          print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
 
                           // 주차 구역 페이지로 이동
                           Navigator.pushNamed(context, '/parking-space');

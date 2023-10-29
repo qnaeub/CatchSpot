@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app/http_setup.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +25,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  int _lotKey = -999;
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
 
@@ -53,7 +58,25 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
+      _lotKey = _pref.getInt("lotKey") ?? -999;
     });
+  }
+
+  Future<void> setRealtimeReserve() async {
+    // status=500 에러 발생
+    Map<String, dynamic> data = {
+      'phone_number': _phonenum,
+      'vehicle_number': _carnum,
+      'lot_key': _lotKey,
+    };
+
+    var response = await post('/setRealtimeReserve/', jsonEncode(data));
+
+    if (response.statusCode == 200) {
+      print('데이터 전송 성공');
+    } else {
+      print('데이터 전송 실패');
+    }
   }
 
   @override
@@ -150,8 +173,12 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                               style: TextStyle(),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: "123가 4568",
+                                hintText: "123가4568",
                               ),
+                              inputFormatters: [
+                                // 한글 및 숫자로 제한
+                                LengthLimitingTextInputFormatter(8), // 8자리로 제한
+                              ],
                             ),
                           ),
                         ),
@@ -189,6 +216,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 border: InputBorder.none,
                                 hintText: "01012345678",
                               ),
+                              keyboardType: TextInputType.number, // 숫자 키보드 사용
+                              inputFormatters: [
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // 숫자만 입력
+                                LengthLimitingTextInputFormatter(
+                                    11), // 11자리로 제한
+                              ],
                             ),
                           ),
                         ),
@@ -215,7 +249,31 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 );
                               },
                             );
+                          } else if (_carnum.length < 7) {
+                            // 차량번호 7자리 미만 시 안내 팝업창 띄움
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: Text("차량번호는 7자리 또는 8자리로 입력해야 합니다."),
+                                );
+                              },
+                            );
+                          } else if (_phonenum.length < 11) {
+                            // 전화번호 11자리 미만 시 안내 팝업창 띄움
+                            showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  content: Text("전화번호는 11자리로 입력해야 합니다."),
+                                );
+                              },
+                            );
                           } else {
+                            //setRealtimeReserve();
+
                             // 예약 완료 페이지로 이동
                             Navigator.pushNamed(context, '/finish-reserve');
                           }
