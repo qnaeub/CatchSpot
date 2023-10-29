@@ -26,7 +26,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _getParkingLot();
   }
 
-  _setParkingLot() {
+  _setParkingLot() async {
     setState(() {
       _parkinglot = textController.text;
       _pref.setString("currentParkinglot", _parkinglot);
@@ -43,9 +43,8 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> getParkingLotNames() async {
     print("getParkingLotNames");
     try {
-      var response =
-          await dio.post('http://10.0.2.2:8080/getParkingLotList/', data: {});
-      print("response");
+      var response = await post('/getParkingLotList/', '');
+      print("response: ${response}");
       if (response.statusCode == 200) {
         print('서버 응답');
       } else {
@@ -109,12 +108,12 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   IconButton(
                     icon: Icon(Icons.search),
-                    onPressed: () {
+                    onPressed: () async {
                       // 검색 실행할 시 실행할 로직
-                      _setParkingLot();
+                      await _setParkingLot();
                       print("검색한 단어: $_parkinglot");
 
-                      getParkingLotNames();
+                      await getParkingLotNames();
                       showContainer = true;
                       // 주차 구역 페이지로 이동
                       //Navigator.pushNamed(context, '/parking-space');

@@ -1,8 +1,13 @@
 import 'package:dio/dio.dart';
 
-const String baseUrl = "http://10.0.2.2:8080";
+const String baseUrl = "http://3.34.125.190:8000";
 
-final dio = Dio();
+BaseOptions options = new BaseOptions(
+    baseUrl: baseUrl,
+    receiveDataWhenStatusError: true,
+    connectTimeout: Duration(seconds: 3),
+    receiveTimeout: Duration(seconds: 3));
+Dio dio = new Dio(options);
 
 Future<Response> post(String url, String body) async {
   final response = await dio.post('$baseUrl$url', data: body);
