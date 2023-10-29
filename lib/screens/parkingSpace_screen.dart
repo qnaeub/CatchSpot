@@ -19,13 +19,24 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   ValueNotifier<bool> selectedDate =
       ValueNotifier<bool>(false); // 날짜 선택할 건가요? > 캘린더 버튼 누르면 true, 아니면 false
   late SharedPreferences _pref;
+  String _carnum = "";
+  String _phonenum = "";
   String _parkingLot = "";
 
   @override
   void initState() {
     super.initState();
+    _getCarAndPhonenum();
     _getParkingLot();
     selectedDate = widget.data; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
+  }
+
+  _getCarAndPhonenum() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _carnum = _pref.getString("currentCarnum") ?? "";
+      _phonenum = _pref.getString("currentPhonenum") ?? "";
+    });
   }
 
   _getParkingLot() async {
@@ -236,25 +247,41 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                         ),
                       )),
                 ),
-              Container(
-                  height: 50,
-                  margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                  child: InkWell(
-                      onTap: () {
-                        // 주차 예약하기 페이지로 이동
-                        Navigator.pushNamed(context, '/setinfo');
-                      },
-                      child: Container(
-                        // 주차 예약하기 버튼
-                        //width: double.infinity,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: Color(0xffFFFFFF),
-                          border: Border.all(color: Color(0xffA076F9)),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(child: Text("주차 예약하기")),
-                      ))),
+              if (_carnum != "" && _phonenum != "")
+                Container(
+                    height: 50,
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    child: Container(
+                      // 주차 예약하기 버튼
+                      //width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Color(0xffFFFFFF),
+                        border: Border.all(color: Color(0xffD9D9D9)),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(child: Text("주차 예약하기")),
+                    ))
+              else
+                Container(
+                    height: 50,
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    child: InkWell(
+                        onTap: () {
+                          // 주차 예약하기 페이지로 이동
+                          Navigator.pushNamed(context, '/setinfo');
+                        },
+                        child: Container(
+                          // 주차 예약하기 버튼
+                          //width: double.infinity,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Color(0xffFFFFFF),
+                            border: Border.all(color: Color(0xffA076F9)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(child: Text("주차 예약하기")),
+                        ))),
             ],
           );
         },
