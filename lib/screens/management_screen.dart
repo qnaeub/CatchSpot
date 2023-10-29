@@ -13,11 +13,13 @@ class _ManageScreenState extends State<ManageScreen> {
   late SharedPreferences _pref;
   String _carnum = "";
   String _phonenum = "";
+  String _parkingLot = "";
 
   @override
   void initState() {
     super.initState();
     _getCarAndPhonenum();
+    _getParkingLot();
   }
 
   _getCarAndPhonenum() async {
@@ -25,6 +27,13 @@ class _ManageScreenState extends State<ManageScreen> {
     setState(() {
       _carnum = _pref.getString("currentCarnum") ?? "";
       _phonenum = _pref.getString("currentPhonenum") ?? "";
+    });
+  }
+
+  _getParkingLot() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _parkingLot = _pref.getString("parkingLot") ?? "";
     });
   }
 

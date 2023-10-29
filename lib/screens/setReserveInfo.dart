@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/screens/management_screen.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,10 +17,10 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String formattedDate = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
   ValueNotifier<bool> isRealTime = ValueNotifier<bool>(true);
 
-  // 차량번호, 전화번호 저장
   late SharedPreferences _pref;
   String _carnum = "";
   String _phonenum = "";
+  String _parkingLot = "";
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
 
@@ -29,19 +28,15 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   void initState() {
     super.initState();
     _getCarAndPhonenum();
+    _getParkingLot();
     isRealTime = widget.realTime;
   }
 
-  _saveCarnum() {
+  _setCarAndPhonenum() {
     setState(() {
       _carnum = _carnumController.text;
-      _pref.setString("currentCarnum", _carnum);
-    });
-  }
-
-  _savePhonenum() {
-    setState(() {
       _phonenum = _phonenumController.text;
+      _pref.setString("currentCarnum", _carnum);
       _pref.setString("currentPhonenum", _phonenum);
     });
   }
@@ -51,6 +46,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _carnum = _pref.getString("currentCarnum") ?? "";
       _phonenum = _pref.getString("currentPhonenum") ?? "";
+    });
+  }
+
+  _getParkingLot() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _parkingLot = _pref.getString("parkingLot") ?? "";
     });
   }
 
@@ -87,7 +89,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             children: [
                               Icon(Icons.location_pin),
                               Spacer(flex: 1),
-                              Text("주차장 이름"), // 검색 시 선택한 주차장 이름 받아옴
+                              Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                               Spacer(flex: 20),
                             ],
                           ),
@@ -200,11 +202,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                     child: InkWell(
                         onTap: () {
                           // 차량번호, 전화번호 데이터 저장
-                          _saveCarnum();
-                          _savePhonenum();
-                          // 차량번호, 전화번호 데이터 저장 확인
-                          print("local 차량번호: $_carnum");
-                          print("local 전화번호: $_phonenum");
+                          _setCarAndPhonenum();
 
                           if (_carnum == "" || _phonenum == "") {
                             // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움

@@ -1,11 +1,17 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_app/http_setup.dart';
-import 'package:http/http.dart' as http;
+
+class parkingLotName {
+  final String lot_name;
+
+  parkingLotName({required this.lot_name});
+  factory parkingLotName.fromJson(Map<String, dynamic> json) {
+    return parkingLotName(lot_name: json['lot_name']);
+  }
+}
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -15,45 +21,62 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  static List<dynamic> parkingLotList = [];
+  static List<String> lotNames = [];
   late SharedPreferences _pref;
-  String _parkinglot = "";
+  String _searchItem = "";
+  String _parkingLot = "";
   TextEditingController textController = TextEditingController();
-  bool showContainer = false;
+  bool showSearchResult = false;
 
   @override
   void initState() {
     super.initState();
+    _getSearchItem();
     _getParkingLot();
+  }
+
+  _setSearchItem() async {
+    setState(() {
+      _searchItem = textController.text;
+      _pref.setString("searchItem", _searchItem);
+    });
+  }
+
+  _getSearchItem() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _searchItem = _pref.getString("searchItem") ?? "";
+    });
   }
 
   _setParkingLot() async {
     setState(() {
-      _parkinglot = textController.text;
-      _pref.setString("currentParkinglot", _parkinglot);
+      _pref.setString("parkingLot", _parkingLot);
     });
   }
 
   _getParkingLot() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
-      _parkinglot = _pref.getString("currentParkinglot") ?? "";
+      _parkingLot = _pref.getString("parkingLot") ?? "";
     });
   }
 
   Future<void> getParkingLotNames() async {
-    print("getParkingLotNames");
-    try {
-      var response = await post('/getParkingLotList/', '');
-      print("response: ${response}");
-      if (response.statusCode == 200) {
-        print('서버 응답');
-      } else {
-        print('서버 응답 오류');
-      }
-      print("if문 끝");
-    } catch (e) {
-      // Connection timed out (OS Error: Connection timed out, errno = 110)
-      print("에러: $e");
+    var response = await post('/getParkingLotList/', '');
+
+    if (response.statusCode == 200) {
+      setState(() {
+        parkingLotList = response.data['resultData'];
+        lotNames = [];
+        for (var item in parkingLotList) {
+          String lotName = item['lot_name'];
+          lotNames.add(lotName);
+        }
+      });
+    } else {
+      print("서버 응답 오류: ${response.statusCode}");
     }
   }
 
@@ -109,35 +132,55 @@ class _SearchScreenState extends State<SearchScreen> {
                   IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () async {
-                      // 검색 실행할 시 실행할 로직
-                      await _setParkingLot();
-                      print("검색한 단어: $_parkinglot");
+                      // 검색 시 실행할 로직
 
+                      // 검색한 단어 로컬에 저장
+                      await _setSearchItem();
+                      print("검색한 단어: $_searchItem");
+
+                      // 주차장 이름 불러오기
                       await getParkingLotNames();
-                      showContainer = true;
-                      // 주차 구역 페이지로 이동
-                      //Navigator.pushNamed(context, '/parking-space');
+                      print("${parkingLotList}");
+                      print("lot names: ${lotNames}");
+
+                      // 주차장 목록 띄우기
+                      showSearchResult = true;
                     },
                     iconSize: 25.0,
                   ),
                 ],
               ),
             ),
-            if (showContainer)
+            if (showSearchResult)
+              Expanded(
+                child: ListView.builder(
+                    // 주차장 목록 보여줌
+                    itemCount: lotNames.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
+                          // 선택한 주차장 로컬에 저장
+                          _parkingLot = lotNames[index];
+                          _setParkingLot();
+                          print("선택한 주차장: ${_parkingLot}");
+
+                          // 주차 구역 페이지로 이동
+                          Navigator.pushNamed(context, '/parking-space');
+                        },
+                        child: ListTile(
+                          title: Text(lotNames[index]),
+                        ),
+                      );
+                    }),
+              )
+            else
               Container(
-                  margin: EdgeInsets.fromLTRB(25, 10, 25, 0),
+                  margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
                   child: Column(
-                    children: <Widget>[
-                      Text("show Container"),
+                    children: [
+                      Text('주차장을 검색하세요.'),
                     ],
                   )),
-            Container(
-                margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
-                child: Column(
-                  children: [
-                    Text('주차장을 검색하세요.'),
-                  ],
-                )),
           ],
         ),
       ),

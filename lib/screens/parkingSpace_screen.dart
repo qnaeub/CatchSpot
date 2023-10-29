@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/screens/setReserveInfo.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
@@ -17,11 +18,21 @@ class ParkingSpaceScreen extends StatefulWidget {
 class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   ValueNotifier<bool> selectedDate =
       ValueNotifier<bool>(false); // 날짜 선택할 건가요? > 캘린더 버튼 누르면 true, 아니면 false
+  late SharedPreferences _pref;
+  String _parkingLot = "";
 
   @override
   void initState() {
     super.initState();
+    _getParkingLot();
     selectedDate = widget.data; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
+  }
+
+  _getParkingLot() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _parkingLot = _pref.getString("parkingLot") ?? "";
+    });
   }
 
   @override
@@ -57,7 +68,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                   children: [
                     Icon(Icons.location_pin),
                     Spacer(flex: 1),
-                    Text("주차장 이름"), // 검색 시 선택한 주차장 이름 받아옴
+                    Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                     Spacer(flex: 20),
                     InkWell(
                       onTap: () {
@@ -263,6 +274,21 @@ class PreReservation extends StatefulWidget {
 class _PreReservationState extends State<PreReservation> {
   ValueNotifier<int> currentPage =
       ValueNotifier<int>(1); // <사전 예약> 위젯에서는 현재 페이지를 변수로 저장하여 왔다 갔다 할 수 있도록 했어요
+  late SharedPreferences _pref;
+  String _parkingLot = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _getParkingLot();
+  }
+
+  _getParkingLot() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _parkingLot = _pref.getString("parkingLot") ?? "";
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +322,7 @@ class _PreReservationState extends State<PreReservation> {
                     children: [
                       Icon(Icons.location_pin),
                       Spacer(flex: 1),
-                      Text("주차장 이름"), // 검색 시 선택한 주차장 이름 받아옴
+                      Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                       Spacer(flex: 20),
                       InkWell(
                         onTap: () {
