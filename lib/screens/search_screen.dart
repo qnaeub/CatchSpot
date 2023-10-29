@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_app/http_setup.dart';
+import 'package:http/http.dart' as http;
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -10,7 +15,48 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+  late SharedPreferences _pref;
+  String _parkinglot = "";
   TextEditingController textController = TextEditingController();
+  bool showContainer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getParkingLot();
+  }
+
+  _setParkingLot() {
+    setState(() {
+      _parkinglot = textController.text;
+      _pref.setString("currentParkinglot", _parkinglot);
+    });
+  }
+
+  _getParkingLot() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _parkinglot = _pref.getString("currentParkinglot") ?? "";
+    });
+  }
+
+  Future<void> getParkingLotNames() async {
+    print("getParkingLotNames");
+    try {
+      var response =
+          await dio.post('http://10.0.2.2:8080/getParkingLotList/', data: {});
+      print("response");
+      if (response.statusCode == 200) {
+        print('서버 응답');
+      } else {
+        print('서버 응답 오류');
+      }
+      print("if문 끝");
+    } catch (e) {
+      // Connection timed out (OS Error: Connection timed out, errno = 110)
+      print("에러: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,14 +111,27 @@ class _SearchScreenState extends State<SearchScreen> {
                     icon: Icon(Icons.search),
                     onPressed: () {
                       // 검색 실행할 시 실행할 로직
-                      // 저장된 텍스트는 textController.text 로 접근 가능
-                      Navigator.pushNamed(context, '/parking-space');
+                      _setParkingLot();
+                      print("검색한 단어: $_parkinglot");
+
+                      getParkingLotNames();
+                      showContainer = true;
+                      // 주차 구역 페이지로 이동
+                      //Navigator.pushNamed(context, '/parking-space');
                     },
                     iconSize: 25.0,
                   ),
                 ],
               ),
             ),
+            if (showContainer)
+              Container(
+                  margin: EdgeInsets.fromLTRB(25, 10, 25, 0),
+                  child: Column(
+                    children: <Widget>[
+                      Text("show Container"),
+                    ],
+                  )),
             Container(
                 margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
                 child: Column(
