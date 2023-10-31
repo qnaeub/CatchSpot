@@ -3,6 +3,7 @@ import 'package:flutter_app/screens/setReserveInfo.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:zoom_widget/zoom_widget.dart';
 
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
@@ -312,6 +313,7 @@ class _PreReservationState extends State<PreReservation> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  bool click = false;
 
   @override
   void initState() {
@@ -524,7 +526,132 @@ class _PreReservationState extends State<PreReservation> {
                             margin: EdgeInsets.fromLTRB(0, 25, 0, 0),
                             decoration: BoxDecoration(color: Color(0xffF5F5F5)),
                             clipBehavior: Clip.hardEdge,
-                            child: Text("사전 예약 구역 도면"))
+                            child: Zoom(
+                              initTotalZoomOut: true,
+                              maxZoomWidth: 500,
+                              maxZoomHeight: 500,
+                              canvasColor: Color(0xffF5F5F5),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    children: <Widget>[
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffD9D9D9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        margin:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffD9D9D9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        margin:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffD9D9D9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        margin:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffD9D9D9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    height: 50,
+                                  ),
+                                  Row(
+                                    children: <Widget>[
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffA076F9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        margin:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffA076F9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      Container(
+                                        width: 90,
+                                        height: 150,
+                                        margin:
+                                            EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffA076F9),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                      ),
+                                      InkWell(
+                                        onTap: () {
+                                          print("Click");
+                                          setState(() {
+                                            click = true;
+                                          });
+                                        },
+                                        child: Container(
+                                            width: 90,
+                                            height: 150,
+                                            margin: EdgeInsets.fromLTRB(
+                                                20, 0, 0, 0),
+                                            decoration: BoxDecoration(
+                                              color: Color(0xffA076F9),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Spacer(),
+                                                if (click == true)
+                                                  Center(
+                                                      child: Text(
+                                                    "Catch Spot!",
+                                                    style: TextStyle(
+                                                        color:
+                                                            Color(0xffFFFFFF)),
+                                                  )),
+                                                Spacer(),
+                                              ],
+                                            )),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ))
                       else if (currentPage.value == 3)
                         Container(),
                     ],
@@ -575,5 +702,37 @@ class _PreReservationState extends State<PreReservation> {
           }),
       bottomNavigationBar: MenuBottom(1),
     );
+  }
+}
+
+class BackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = Color(0xffD9D9D9)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(Offset(0, 0) & const Size(500, 500), paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
+  }
+}
+
+class BoxPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint2 = Paint()
+      ..color = Color(0xffA076F9)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawRect(Offset(0, 0) & const Size(50, 100), paint2);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return false;
   }
 }
