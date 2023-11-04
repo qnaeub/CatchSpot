@@ -14,12 +14,14 @@ class _ManageScreenState extends State<ManageScreen> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  String _zoneName = "";
 
   @override
   void initState() {
     super.initState();
     _getCarAndPhonenum();
     _getParkingLot();
+    _getParkingZone();
   }
 
   _cancelReserve() {
@@ -27,9 +29,11 @@ class _ManageScreenState extends State<ManageScreen> {
       _carnum = "";
       _phonenum = "";
       _parkingLot = "";
+      _zoneName = "";
       _pref.setString("carnum", _carnum);
       _pref.setString("phonenum", _phonenum);
       _pref.setString("parkingLot", _parkingLot);
+      _pref.setString("parkingZone", _zoneName);
     });
   }
 
@@ -48,6 +52,13 @@ class _ManageScreenState extends State<ManageScreen> {
     });
   }
 
+  _getParkingZone() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _zoneName = _pref.getString("parkingZone") ?? "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget childWidget;
@@ -59,42 +70,150 @@ class _ManageScreenState extends State<ManageScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                    decoration: BoxDecoration(
-                      color: Color(0xffFFFFFF),
-                      border: Border.all(color: Color(0xffD9D9D9), width: 1),
-                    ),
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          // 차량번호
-                          height: 30,
-                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.directions_car),
-                              Spacer(flex: 1),
-                              Text("$_carnum"),
-                              Spacer(flex: 20),
-                            ],
+                  Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                        decoration: BoxDecoration(
+                          color: Color(0xffFFFFFF),
+                          border:
+                              Border.all(color: Color(0xffD9D9D9), width: 1),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              // 차량번호
+                              height: 30,
+                              margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.directions_car),
+                                  Spacer(flex: 1),
+                                  Text("$_carnum"),
+                                  Spacer(flex: 20),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              // 전화번호
+                              height: 30,
+                              margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.call),
+                                  Spacer(flex: 1),
+                                  Text("$_phonenum"),
+                                  Spacer(flex: 20),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 15,
+                        left: 50,
+                        child: Container(
+                          width: 30,
+                          decoration: BoxDecoration(
+                            color: Color(0xffFFFFFF),
+                          ),
+                          child: Text(
+                            "MY",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff6528F7)),
                           ),
                         ),
-                        Container(
-                          // 전화번호
-                          height: 30,
-                          margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
-                          child: Row(
-                            children: [
-                              Icon(Icons.call),
-                              Spacer(flex: 1),
-                              Text("$_phonenum"),
-                              Spacer(flex: 20),
-                            ],
+                      )
+                    ],
+                  ),
+                  Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                        decoration: BoxDecoration(
+                          color: Color(0xffFFFFFF),
+                          border:
+                              Border.all(color: Color(0xffD9D9D9), width: 1),
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              // 예약 시간
+                              height: 30,
+                              margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.calendar_month),
+                                  Spacer(flex: 1),
+                                  Text("예약 시간"),
+                                  Spacer(flex: 20),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              // 주차장 이름
+                              height: 30,
+                              margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.location_pin),
+                                  Spacer(flex: 1),
+                                  Text("$_parkingLot"),
+                                  Spacer(flex: 20),
+                                ],
+                              ),
+                            ),
+                            if (_zoneName != "")
+                              Container(
+                                // 주차 구역 이름
+                                height: 30,
+                                margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.local_parking),
+                                    Spacer(flex: 1),
+                                    Text("$_zoneName"),
+                                    Spacer(flex: 20),
+                                  ],
+                                ),
+                              ),
+                            Container(
+                              // 현재 상태
+                              height: 30,
+                              margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.check_circle),
+                                  Spacer(flex: 1),
+                                  Text("예약 완료"),
+                                  Spacer(flex: 20),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Positioned(
+                        top: 15,
+                        left: 50,
+                        child: Container(
+                          width: 120,
+                          decoration: BoxDecoration(
+                            color: Color(0xffFFFFFF),
+                          ),
+                          child: Text(
+                            "Parking Area",
+                            style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff6528F7)),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),
