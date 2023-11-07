@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
             SetReserveInfo(realTime: ValueNotifier<bool>(true)),
         '/parking-space': (context) =>
             ParkingSpaceScreen(data: ValueNotifier<bool>(false)),
-        '/pre-reservation': (context) => PreReservation(),
+        //'/pre-reservation': (context) => PreReservation(),
         '/finish-reserve': (context) => FinishReserve(),
       },
       debugShowCheckedModeBanner: false,

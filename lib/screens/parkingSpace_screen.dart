@@ -4,6 +4,7 @@ import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:flutter_app/parkingLot_Space.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
@@ -19,10 +20,18 @@ class ParkingSpaceScreen extends StatefulWidget {
 class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   ValueNotifier<bool> selectedDate =
       ValueNotifier<bool>(false); // 날짜 선택할 건가요? > 캘린더 버튼 누르면 true, 아니면 false
+  DateTime selectedDay = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
+  DateTime focusedDay = DateTime.now();
+
   late SharedPreferences _pref;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  DateTime reserveDate = DateTime.utc(1999, 12, 31, 0, 0, 0, 0, 0);
 
   @override
   void initState() {
@@ -122,6 +131,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                       Spacer(flex: 1),
                       InkWell(
                           onTap: () {
+                            selectedDate.value = true;
                             // 날짜 변경
                           },
                           child: Text("$formattedDate") // 현재시각
@@ -145,28 +155,47 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                       child: SizedBox(
                           width: double.infinity,
                           height: 465.0,
-                          child: DecoratedBox(
-                            child: Column(
-                              children: [
-                                Text("달력 라이브러리"),
-                                // 임시로 텍스트 버튼으로 만들었어여...
-                                TextButton(
-                                    onPressed: (() {
-                                      Navigator.pushNamed(
-                                          context, '/parking-space');
-                                    }),
-                                    child: Text("오늘 날짜 선택한다면")),
-                                TextButton(
-                                    onPressed: (() {
-                                      Navigator.pushNamed(
-                                          context, '/pre-reservation');
-                                    }),
-                                    child: Text("다른 날짜 선택한다면"))
-                              ],
+                          child: TableCalendar(
+                            firstDay: DateTime.now(),
+                            lastDay: DateTime.utc(2023, 12, 31),
+                            focusedDay: DateTime.now(),
+                            headerStyle: HeaderStyle(
+                              formatButtonVisible: false,
+                              titleCentered: true,
                             ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
+                            calendarStyle: CalendarStyle(
+                              weekendTextStyle: const TextStyle(
+                                  color: const Color(0xFFFF0000)),
                             ),
+                            onDaySelected:
+                                (DateTime selectedDay, DateTime focusedDay) {
+                              // 선택된 날짜의 상태 갱신
+                              setState(() {
+                                this.selectedDay = selectedDay;
+                                this.focusedDay = focusedDay;
+                              });
+
+                              if ((selectedDay.month == DateTime.now().month) &&
+                                  (selectedDay.day == DateTime.now().day)) {
+                                print("오늘 날짜 선택");
+                                Navigator.pushNamed(context, '/parking-space');
+                              } else {
+                                reserveDate = selectedDay;
+                                print("다른 날짜 선택: $reserveDate");
+                                //Navigator.pushNamed(
+                                //context, '/pre-reservation');
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => PreReservation(
+                                            data: ValueNotifier<DateTime>(
+                                                reserveDate))));
+                              }
+                            },
+                            selectedDayPredicate: (DateTime day) {
+                              // selectedDay 와 동일한 날짜의 모양 바꾸기
+                              return isSameDay(selectedDay, day);
+                            },
                           )),
                     ),
                 ],
@@ -216,7 +245,10 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
 }
 
 class PreReservation extends StatefulWidget {
-  const PreReservation({super.key});
+  //const PreReservation({super.key});
+  ValueNotifier<DateTime> data;
+
+  PreReservation({required this.data});
 
   @override
   State<PreReservation> createState() => _PreReservationState();
@@ -225,6 +257,8 @@ class PreReservation extends StatefulWidget {
 class _PreReservationState extends State<PreReservation> {
   ValueNotifier<int> currentPage =
       ValueNotifier<int>(1); // <사전 예약> 위젯에서는 현재 페이지를 변수로 저장하여 왔다 갔다 할 수 있도록 했어요
+  ValueNotifier<DateTime> reserveDate =
+      ValueNotifier<DateTime>(DateTime.utc(1999, 12, 31, 0, 0, 0, 0, 0));
   late SharedPreferences _pref;
   String _carnum = "";
   String _phonenum = "";
@@ -321,12 +355,25 @@ class _PreReservationState extends State<PreReservation> {
                             constraints:
                                 BoxConstraints(), // padding, constraints >> IconButton의 자체 여백 없애는 요소
                             icon: Icon(Icons.calendar_month),
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ParkingSpaceScreen(
+                                          data: ValueNotifier<bool>(true))));
+                            },
                           ),
                           Spacer(flex: 1),
                           InkWell(
                               onTap: () {
                                 // 날짜 변경
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            ParkingSpaceScreen(
+                                                data: ValueNotifier<bool>(
+                                                    true))));
                               },
                               child: Text("$formattedDate") // 현재시각
                               ),
@@ -352,7 +399,7 @@ class _PreReservationState extends State<PreReservation> {
                                           width: 1.0, color: Color(0xffD9D9D9)),
                                     )),
                                     child: Center(
-                                      child: Text("선택한 날짜 들어갈 자리",
+                                      child: Text("$reserveDate",
                                           style: TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.bold,
