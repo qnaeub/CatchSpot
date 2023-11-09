@@ -15,6 +15,8 @@ class _ManageScreenState extends State<ManageScreen> {
   String _phonenum = "";
   String _parkingLot = "";
   String _zoneName = "";
+  String _reserveDate = "";
+  DateTime _datetime = DateTime.now();
 
   @override
   void initState() {
@@ -22,6 +24,7 @@ class _ManageScreenState extends State<ManageScreen> {
     _getCarAndPhonenum();
     _getParkingLot();
     _getParkingZone();
+    _getReserveDate();
   }
 
   _cancelReserve() {
@@ -30,10 +33,19 @@ class _ManageScreenState extends State<ManageScreen> {
       _phonenum = "";
       _parkingLot = "";
       _zoneName = "";
+      _reserveDate = "";
       _pref.setString("carnum", _carnum);
       _pref.setString("phonenum", _phonenum);
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("parkingZone", _zoneName);
+      _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _getReserveDate() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _datetime = DateTime.parse(_pref.getString("reserveDate") ?? "");
     });
   }
 
@@ -148,7 +160,11 @@ class _ManageScreenState extends State<ManageScreen> {
                                 children: [
                                   Icon(Icons.calendar_month),
                                   Spacer(flex: 1),
-                                  Text("예약 시간"),
+                                  //if ((_datetime.year == DateTime.now().year) &&
+                                  //(_datetime.month == DateTime.now().month) &&
+                                  //(_datetime.day == DateTime.now().day))
+                                  Text(
+                                      "${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}~"),
                                   Spacer(flex: 20),
                                 ],
                               ),

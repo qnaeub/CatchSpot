@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,6 +26,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  DateTime _datetime = DateTime.now();
   int _lotKey = -999;
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
@@ -34,7 +36,14 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     super.initState();
     _getCarAndPhonenum();
     _getParkingLot();
+    _getReserveDate();
     isRealTime = widget.realTime;
+  }
+
+  _setReserveDate() async {
+    setState(() {
+      _pref.setString("reserveDate", DateTime.now().toString());
+    });
   }
 
   _setCarAndPhonenum() {
@@ -43,6 +52,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
       _phonenum = _phonenumController.text;
       _pref.setString("carnum", _carnum);
       _pref.setString("phonenum", _phonenum);
+    });
+  }
+
+  _getReserveDate() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _datetime = DateTime.parse(_pref.getString("reserveDate") ?? "");
     });
   }
 
@@ -82,18 +98,15 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50),
-        child: AppBar(
-          title: Text(
-            '예약 정보 입력',
-            style: TextStyle(color: Color(0xff6528F7)),
-          ),
-          centerTitle: true,
-          backgroundColor: Color(0xffFFFFFF),
-          elevation: 1,
-          automaticallyImplyLeading: false,
+      appBar: AppBar(
+        title: Text(
+          '예약 정보 입력',
+          style: TextStyle(color: Color(0xff6528F7)),
         ),
+        centerTitle: true,
+        backgroundColor: Color(0xffFFFFFF),
+        elevation: 1,
+        automaticallyImplyLeading: false,
       ),
       body: ValueListenableBuilder(
           valueListenable: isRealTime,
@@ -132,8 +145,14 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                               },
                             ),
                             Spacer(flex: 1),
-                            Text("$formattedDate"), // 현재시각
-                            Spacer(flex: 20),
+                            if (isRealTime.value == true) ...[
+                              Text(
+                                  "${_datetime.year}.${_datetime.month}.${_datetime.day} (10분 내 입차)") // 현재시각
+                            ] else ...[
+                              Text(
+                                  "${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}")
+                            ],
+                            Spacer(flex: 10),
                           ]),
                         ),
                         if (isRealTime.value == false)
@@ -273,6 +292,9 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             );
                           } else {
                             //setRealtimeReserve();
+                            if (isRealTime.value) {
+                              _setReserveDate();
+                            }
 
                             // 예약 완료 페이지로 이동
                             Navigator.pushNamed(context, '/finish-reserve');

@@ -37,6 +37,7 @@ dependencies:
   dio: ^5.3.3
   zoom_widget: ^2.0.1
   table_calendar: ^3.0.9
+  flutter_time_picker_spinner: ^2.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

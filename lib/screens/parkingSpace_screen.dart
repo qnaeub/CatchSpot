@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/screens/setReserveInfo.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:flutter_app/parkingLot_Space.dart';
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -31,14 +32,28 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
-  DateTime reserveDate = DateTime.utc(1999, 12, 31, 0, 0, 0, 0, 0);
+  String _reserveDate = "";
 
   @override
   void initState() {
     super.initState();
+    _getReserveDate();
     _getCarAndPhonenum();
     _getParkingLot();
     selectedDate = widget.data; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
+  }
+
+  _setReserveDate() async {
+    setState(() {
+      _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _getReserveDate() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _reserveDate = _pref.getString("reserveDate") ?? "";
+    });
   }
 
   _getCarAndPhonenum() async {
@@ -180,16 +195,11 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                                 print("오늘 날짜 선택");
                                 Navigator.pushNamed(context, '/parking-space');
                               } else {
-                                reserveDate = selectedDay;
-                                print("다른 날짜 선택: $reserveDate");
-                                //Navigator.pushNamed(
-                                //context, '/pre-reservation');
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => PreReservation(
-                                            data: ValueNotifier<DateTime>(
-                                                reserveDate))));
+                                _reserveDate = selectedDay.toString();
+                                _setReserveDate();
+                                print("다른 날짜 선택: $_reserveDate");
+                                Navigator.pushNamed(
+                                    context, '/pre-reservation');
                               }
                             },
                             selectedDayPredicate: (DateTime day) {
@@ -245,10 +255,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
 }
 
 class PreReservation extends StatefulWidget {
-  //const PreReservation({super.key});
-  ValueNotifier<DateTime> data;
-
-  PreReservation({required this.data});
+  const PreReservation({super.key});
 
   @override
   State<PreReservation> createState() => _PreReservationState();
@@ -257,19 +264,36 @@ class PreReservation extends StatefulWidget {
 class _PreReservationState extends State<PreReservation> {
   ValueNotifier<int> currentPage =
       ValueNotifier<int>(1); // <사전 예약> 위젯에서는 현재 페이지를 변수로 저장하여 왔다 갔다 할 수 있도록 했어요
-  ValueNotifier<DateTime> reserveDate =
-      ValueNotifier<DateTime>(DateTime.utc(1999, 12, 31, 0, 0, 0, 0, 0));
   late SharedPreferences _pref;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  String _reserveDate = "";
+  DateTime _datetime = DateTime.now();
+  //String _reserveDate = "";
   bool click = false;
 
   @override
   void initState() {
     super.initState();
+    _setReserveDate();
+    _getReserveDate();
     _getParkingLot();
     _getCarAndPhonenum();
+  }
+
+  _setReserveDate() async {
+    setState(() {
+      _reserveDate = _datetime.toString();
+      _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _getReserveDate() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _datetime = DateTime.parse(_pref.getString("reserveDate") ?? "");
+    });
   }
 
   _getCarAndPhonenum() async {
@@ -383,103 +407,111 @@ class _PreReservationState extends State<PreReservation> {
                       if (currentPage.value == 1)
                         Container(
                           margin: EdgeInsets.only(top: 25.0),
-                          child: SizedBox(
-                              width: double.infinity,
-                              height: 465.0,
+                          child: Center(
                               child: Column(
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 74.0,
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                      top: BorderSide(
-                                          width: 1.0, color: Color(0xffD9D9D9)),
-                                      bottom: BorderSide(
-                                          width: 1.0, color: Color(0xffD9D9D9)),
-                                    )),
-                                    child: Center(
-                                      child: Text("$reserveDate",
-                                          style: TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.bold,
-                                          )),
-                                    ),
-                                  ),
-                                  Container(
-                                    width: double.infinity,
-                                    height: 391.0,
-                                    decoration: BoxDecoration(
-                                        border: Border(
-                                      bottom: BorderSide(
-                                          width: 1.0, color: Color(0xffD9D9D9)),
-                                    )),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        Text("시간 선택 라이브러리"),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Container(
-                                              width: 100.0,
-                                              height: 50.0,
-                                              child: OutlinedButton(
-                                                  onPressed: () {
-                                                    // Navigator.pushNamed(
-                                                    //     context, '/parking-space');
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              ParkingSpaceScreen(
-                                                                  data: ValueNotifier<
-                                                                          bool>(
-                                                                      true))),
-                                                    );
-                                                  },
-                                                  style:
-                                                      OutlinedButton.styleFrom(
-                                                    side: BorderSide(
-                                                      color: Color(0xffA076F9),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    "이전",
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 20.0),
-                                                  )),
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 74.0,
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                  top: BorderSide(
+                                      width: 1.0, color: Color(0xffD9D9D9)),
+                                  bottom: BorderSide(
+                                      width: 1.0, color: Color(0xffD9D9D9)),
+                                )),
+                                child: Center(
+                                  child: Text(
+                                      "${_datetime.year}년 ${_datetime.month}월 ${_datetime.day}일",
+                                      style: TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                      )),
+                                ),
+                              ),
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                                  child: TimePickerSpinner(
+                                    time: _datetime,
+                                    minutesInterval: 10,
+                                    is24HourMode: false,
+                                    itemHeight: 60,
+                                    normalTextStyle: const TextStyle(
+                                        fontSize: 30, color: Color(0xffD9D9D9)),
+                                    highlightedTextStyle: const TextStyle(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xff000000)),
+                                    isForce2Digits: true,
+                                    spacing: 50,
+                                    onTimeChange: (time) {
+                                      _datetime = DateTime(
+                                          _datetime.year,
+                                          _datetime.month,
+                                          _datetime.day,
+                                          time.hour,
+                                          time.minute);
+                                      _setReserveDate();
+                                      print("예약날짜: ${_reserveDate}");
+                                    },
+                                  )),
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Container(
+                                        width: 100.0,
+                                        height: 50.0,
+                                        child: OutlinedButton(
+                                            onPressed: () {
+                                              // Navigator.pushNamed(
+                                              //     context, '/parking-space');
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ParkingSpaceScreen(
+                                                            data: ValueNotifier<
+                                                                bool>(true))),
+                                              );
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              side: BorderSide(
+                                                color: Color(0xffA076F9),
+                                              ),
                                             ),
-                                            Container(
-                                              width: 100.0,
-                                              height: 50.0,
-                                              child: OutlinedButton(
-                                                  onPressed: () {
-                                                    currentPage.value = 2;
-                                                  },
-                                                  style:
-                                                      OutlinedButton.styleFrom(
-                                                    side: BorderSide(
-                                                      color: Color(0xffA076F9),
-                                                    ),
-                                                  ),
-                                                  child: Text(
-                                                    "다음",
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 20.0),
-                                                  )),
-                                            )
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              )),
+                                            child: Text(
+                                              "이전",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 20.0),
+                                            )),
+                                      ),
+                                      Container(
+                                        width: 100.0,
+                                        height: 50.0,
+                                        child: OutlinedButton(
+                                            onPressed: () {
+                                              currentPage.value = 2;
+                                            },
+                                            style: OutlinedButton.styleFrom(
+                                              side: BorderSide(
+                                                color: Color(0xffA076F9),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              "다음",
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 20.0),
+                                            )),
+                                      )
+                                    ],
+                                  )),
+                            ],
+                          )),
                         )
                       else if (currentPage.value == 2)
                         Container(
@@ -539,6 +571,42 @@ class _PreReservationState extends State<PreReservation> {
             );
           }),
       bottomNavigationBar: MenuBottom(1),
+    );
+  }
+}
+
+class TimePicker extends StatefulWidget {
+  const TimePicker({super.key});
+
+  @override
+  State<TimePicker> createState() => _TimePickerState();
+}
+
+class _TimePickerState extends State<TimePicker> {
+  TimeOfDay initialTime = TimeOfDay.now();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text(
+          '${initialTime.hour}:${initialTime.minute}',
+          style: TextStyle(fontSize: 40),
+        ),
+        ElevatedButton(
+            onPressed: () async {
+              final TimeOfDay? timeOfDay = await showTimePicker(
+                context: context,
+                initialTime: initialTime,
+              );
+              if (timeOfDay != null) {
+                setState(() {
+                  initialTime = timeOfDay;
+                });
+              }
+            },
+            child: Text('TimePicker'))
+      ]),
     );
   }
 }
