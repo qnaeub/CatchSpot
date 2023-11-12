@@ -270,8 +270,6 @@ class _PreReservationState extends State<PreReservation> {
   String _parkingLot = "";
   String _reserveDate = "";
   DateTime _datetime = DateTime.now();
-  //String _reserveDate = "";
-  bool click = false;
 
   @override
   void initState() {

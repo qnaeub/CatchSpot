@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,7 +17,14 @@ class _ManageScreenState extends State<ManageScreen> {
   String _parkingLot = "";
   String _zoneName = "";
   String _reserveDate = "";
+  String _processState = "";
   DateTime _datetime = DateTime.now();
+  bool isEdit = false;
+
+  late TextEditingController _carnumController =
+      TextEditingController(text: "$_carnum");
+  late TextEditingController _phonenumController =
+      TextEditingController(text: "$_phonenum");
 
   @override
   void initState() {
@@ -25,6 +33,7 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
+    _getProcessState();
   }
 
   _cancelReserve() {
@@ -39,6 +48,15 @@ class _ManageScreenState extends State<ManageScreen> {
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("parkingZone", _zoneName);
       _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _setCarAndPhonenum() {
+    setState(() {
+      _carnum = _carnumController.text;
+      _phonenum = _phonenumController.text;
+      _pref.setString("carnum", _carnum);
+      _pref.setString("phonenum", _phonenum);
     });
   }
 
@@ -71,6 +89,13 @@ class _ManageScreenState extends State<ManageScreen> {
     });
   }
 
+  _getProcessState() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _processState = _pref.getString("processState") ?? "";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget childWidget;
@@ -100,9 +125,44 @@ class _ManageScreenState extends State<ManageScreen> {
                               child: Row(
                                 children: [
                                   Icon(Icons.directions_car),
-                                  Spacer(flex: 1),
-                                  Text("$_carnum"),
-                                  Spacer(flex: 20),
+                                  if (isEdit == false) ...[
+                                    Spacer(flex: 1),
+                                    Text("$_carnum"),
+                                    Spacer(flex: 20),
+                                  ] else ...[
+                                    Spacer(flex: 1),
+                                    Container(
+                                      // 차량번호 입력칸
+                                      width: 200,
+                                      height: 30,
+                                      padding: EdgeInsets.fromLTRB(10, 9, 0, 0),
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffFFFFFF),
+                                          border: Border.all(
+                                              color: Color(0xffA076F9),
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: SizedBox(
+                                        width: 200.0,
+                                        child: TextField(
+                                          cursorColor: Color(0xffA076F9),
+                                          controller: _carnumController,
+                                          style: TextStyle(),
+                                          decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: "$_carnum",
+                                          ),
+                                          inputFormatters: [
+                                            // 한글 및 숫자로 제한
+                                            LengthLimitingTextInputFormatter(
+                                                8), // 8자리로 제한
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Spacer(flex: 10),
+                                  ],
                                 ],
                               ),
                             ),
@@ -113,9 +173,48 @@ class _ManageScreenState extends State<ManageScreen> {
                               child: Row(
                                 children: [
                                   Icon(Icons.call),
-                                  Spacer(flex: 1),
-                                  Text("$_phonenum"),
-                                  Spacer(flex: 20),
+                                  if (isEdit == false) ...[
+                                    Spacer(flex: 1),
+                                    Text("$_phonenum"),
+                                    Spacer(flex: 20),
+                                  ] else ...[
+                                    Spacer(flex: 1),
+                                    Container(
+                                      // 전화번호 입력칸
+                                      width: 200,
+                                      height: 30,
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 12, 0, 0),
+                                      decoration: BoxDecoration(
+                                          color: Color(0xffFFFFFF),
+                                          border: Border.all(
+                                              color: Color(0xffA076F9),
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10)),
+                                      child: SizedBox(
+                                        width: 200.0,
+                                        child: TextField(
+                                          cursorColor: Color(0xffA076F9),
+                                          controller: _phonenumController,
+                                          style: TextStyle(),
+                                          decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            hintText: "01012345678",
+                                          ),
+                                          keyboardType:
+                                              TextInputType.number, // 숫자 키보드 사용
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly, // 숫자만 입력
+                                            LengthLimitingTextInputFormatter(
+                                                11), // 11자리로 제한
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Spacer(flex: 10),
+                                  ],
                                 ],
                               ),
                             ),
@@ -165,7 +264,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                   //(_datetime.day == DateTime.now().day))
                                   Text(
                                       "${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}~"),
-                                  Spacer(flex: 20),
+                                  Spacer(flex: 13),
                                 ],
                               ),
                             ),
@@ -204,7 +303,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                 children: [
                                   Icon(Icons.check_circle),
                                   Spacer(flex: 1),
-                                  Text("예약 완료"),
+                                  Text("${_processState}"),
                                   Spacer(flex: 20),
                                 ],
                               ),
@@ -235,24 +334,105 @@ class _ManageScreenState extends State<ManageScreen> {
               ),
             ),
           ),
-          Container(
-              height: 50,
-              margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
-              child: InkWell(
-                onTap: () {
-                  _cancelReserve();
-                  Navigator.pushNamed(context, '/manage');
-                },
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Color(0xffFFFFFF),
-                    border: Border.all(color: Color(0xffA076F9)),
-                    borderRadius: BorderRadius.circular(10),
+          if (isEdit == true)
+            Container(
+                height: 50,
+                margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                child: InkWell(
+                  onTap: () {
+                    _cancelReserve();
+                    Navigator.pushNamed(context, '/manage');
+                  },
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Color(0xffFFFFFF),
+                      border: Border.all(color: Color(0xff7F7F7F)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(child: Text("예약 취소하기")),
                   ),
-                  child: Center(child: Text("예약 취소하기")),
-                ),
-              ))
+                )),
+          if (isEdit == false) ...[
+            Container(
+                height: 50,
+                margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                child: InkWell(
+                  onTap: () {
+                    // 예약을 수정 가능하도록 함
+                    setState(() {
+                      isEdit = true;
+                    });
+                  },
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Color(0xffFFFFFF),
+                      border: Border.all(color: Color(0xffA076F9)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(child: Text("예약 변경하기")),
+                  ),
+                ))
+          ] else ...[
+            Container(
+                height: 50,
+                margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                child: InkWell(
+                  onTap: () {
+                    // 예약 수정
+                    _setCarAndPhonenum();
+
+                    if (_carnum == "" || _phonenum == "") {
+                      // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text("차량번호와 전화번호를 반드시 입력해야 합니다."),
+                          );
+                        },
+                      );
+                    } else if (_carnum.length < 7) {
+                      // 차량번호 7자리 미만 시 안내 팝업창 띄움
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text("차량번호는 7자리 또는 8자리로 입력해야 합니다."),
+                          );
+                        },
+                      );
+                    } else if (_phonenum.length < 11) {
+                      // 전화번호 11자리 미만 시 안내 팝업창 띄움
+                      showDialog(
+                        context: context,
+                        barrierDismissible: true,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            content: Text("전화번호는 11자리로 입력해야 합니다."),
+                          );
+                        },
+                      );
+                    } else {
+                      setState(() {
+                        isEdit = false;
+                      });
+                    }
+                  },
+                  child: Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Color(0xffFFFFFF),
+                      border: Border.all(color: Color(0xffA076F9)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(child: Text("예약 수정하기")),
+                  ),
+                ))
+          ],
         ],
       );
     } else {

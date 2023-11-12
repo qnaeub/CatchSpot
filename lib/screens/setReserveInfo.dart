@@ -26,6 +26,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  String _processState = "";
   DateTime _datetime = DateTime.now();
   int _lotKey = -999;
   TextEditingController _carnumController = TextEditingController();
@@ -38,6 +39,10 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _getParkingLot();
     _getReserveDate();
     isRealTime = widget.realTime;
+  }
+
+  _setProcessState() async {
+    _pref.setString("processState", _processState);
   }
 
   _setReserveDate() async {
@@ -291,10 +296,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                               },
                             );
                           } else {
-                            //setRealtimeReserve();
                             if (isRealTime.value) {
                               _setReserveDate();
                             }
+
+                            // 예약현황 - 진행상태 설정
+                            _processState = "예약완료";
+                            _setProcessState();
 
                             // 예약 완료 페이지로 이동
                             Navigator.pushNamed(context, '/finish-reserve');
