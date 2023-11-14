@@ -26,19 +26,27 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
+  String _zoneName = "";
   String _processState = "";
   DateTime _datetime = DateTime.now();
   int _lotKey = -999;
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
+  final _hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08'];
+  final _minutes = ['00', '10', '20', '30', '40', '50'];
+  String? _selectedHour = '';
+  String _selectedMinute = '';
 
   @override
   void initState() {
     super.initState();
     _getCarAndPhonenum();
     _getParkingLot();
+    _getParkingZone();
     _getReserveDate();
     isRealTime = widget.realTime;
+    _selectedHour = _hours[0];
+    _selectedMinute = _minutes[1];
   }
 
   _setProcessState() async {
@@ -80,6 +88,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
       _lotKey = _pref.getInt("lotKey") ?? -999;
+    });
+  }
+
+  _getParkingZone() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _zoneName = _pref.getString("parkingZone") ?? "";
     });
   }
 
@@ -160,11 +175,88 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             Spacer(flex: 10),
                           ]),
                         ),
-                        if (isRealTime.value == false)
+                        if (isRealTime.value == false) ...[
                           Container(
-                              height: 30,
-                              margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                              child: Text('사전 예약인 경우에만 예약 시간 설정')),
+                            // 사전 예약 시 예약 시간 설정
+                            height: 35,
+                            margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                            child: Row(children: [
+                              Icon(Icons.timer),
+                              Spacer(flex: 1),
+                              Container(
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xffA076F9), width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: DropdownButton(
+                                  padding: EdgeInsets.fromLTRB(35, 0, 0, 0),
+                                  underline: SizedBox.shrink(),
+                                  value: _selectedHour,
+                                  items: _hours.map((String item) {
+                                    return DropdownMenuItem<String>(
+                                      child: Text(item),
+                                      value: item,
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    // items 의 DropdownMenuItem 의 value 반환
+                                    setState(() {
+                                      _selectedHour = newValue!;
+                                    });
+                                  },
+                                  isExpanded: true,
+                                ),
+                              ),
+                              Spacer(flex: 1),
+                              Text("시간"),
+                              Spacer(flex: 1),
+                              Container(
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xffA076F9), width: 1),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: DropdownButton(
+                                  padding: EdgeInsets.fromLTRB(35, 0, 0, 0),
+                                  underline: SizedBox.shrink(),
+                                  value: _selectedMinute,
+                                  items: _minutes.map((String item) {
+                                    return DropdownMenuItem<String>(
+                                      child: Text(item),
+                                      value: item,
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    // items 의 DropdownMenuItem 의 value 반환
+                                    setState(() {
+                                      _selectedMinute = newValue!;
+                                    });
+                                  },
+                                  isExpanded: true,
+                                ),
+                              ),
+                              Spacer(flex: 1),
+                              Text("분"),
+                              Spacer(flex: 3),
+                            ]),
+                          ),
+                          Container(
+                            // 사전 예약 시 주차구역 이름 표시
+                            height: 30,
+                            margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.local_parking),
+                                Spacer(flex: 1),
+                                Text("$_zoneName"),
+                                Spacer(flex: 20),
+                              ],
+                            ),
+                          ),
+                        ],
                         Container(
                           // 차량번호
                           height: 30,
@@ -197,7 +289,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                               style: TextStyle(),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: "123가4568",
+                                hintText: "000가0000",
                               ),
                               inputFormatters: [
                                 // 한글 및 숫자로 제한
@@ -238,7 +330,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                               style: TextStyle(),
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: "01012345678",
+                                hintText: "01000000000",
                               ),
                               keyboardType: TextInputType.number, // 숫자 키보드 사용
                               inputFormatters: [
