@@ -21,7 +21,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  static List<dynamic> parkingLotList = [];
+  static String parkingLotList = "";
   static List<String> lotNames = [];
   static List<int> lotKeys = [];
   late SharedPreferences _pref;
@@ -67,21 +67,19 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
-  Future<void> getParkingLotNames() async {
-    var response = await post('/getParkingLotList/', '');
+  Future<void> _getParkingLotList() async {
+    var response = await get('/search', {'q': '$_searchItem'});
 
     if (response.statusCode == 200) {
+      print("테스트 결과: $response");
       setState(() {
-        parkingLotList = response.data['resultData'];
         lotNames = [];
         lotKeys = [];
-        for (var item in parkingLotList) {
-          String lotName = item['lot_name'];
-          int lotKey = item['lot_key'];
-          lotNames.add(lotName);
-          lotKeys.add(lotKey);
-        }
+        parkingLotList = response.data['주차장 이름'];
+        lotNames.add(parkingLotList);
       });
+      print("테스트 주차장 이름: $parkingLotList");
+      print("테스트 주차장 이름 목록: $lotNames");
     } else {
       print("서버 응답 오류: ${response.statusCode}");
     }
@@ -139,19 +137,33 @@ class _SearchScreenState extends State<SearchScreen> {
                   IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () async {
-                      // 검색 시 실행할 로직
-
                       // 검색한 단어 로컬에 저장
                       await _setSearchItem();
                       print("검색한 단어: $_searchItem");
 
-                      // 주차장 이름 불러오기
-                      await getParkingLotNames();
-                      print("${parkingLotList}");
-                      print("lot names: ${lotNames}");
+                      if (_searchItem.length < 2) {
+                        // 2글자 미만 검색 시 팝업창 띄움
+                        showDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              content: Text("2글자 이상의 단어를 검색해주세요."),
+                            );
+                          },
+                        );
+                      } else {
+                        // 주차장 불러오기
+                        await _getParkingLotList();
 
-                      // 주차장 목록 띄우기
-                      showSearchResult = true;
+                        // 주차장 이름 불러오기
+                        //await getParkingLotNames();
+                        print("${parkingLotList}");
+                        print("lot names: ${lotNames}");
+
+                        // 주차장 목록 띄우기
+                        showSearchResult = true;
+                      }
                     },
                     iconSize: 25.0,
                   ),
@@ -168,7 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onTap: () {
                           // 선택한 주차장 로컬에 저장
                           _parkingLot = lotNames[index];
-                          _lotKey = lotKeys[index];
+                          //_lotKey = lotKeys[index];
                           _setParkingLot();
                           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
 
@@ -183,9 +195,16 @@ class _SearchScreenState extends State<SearchScreen> {
               )
             else
               Container(
-                  margin: EdgeInsets.fromLTRB(0, 260, 0, 0),
+                  margin: EdgeInsets.fromLTRB(0, 200, 0, 0),
                   child: Column(
                     children: [
+                      SizedBox(
+                        child: Icon(
+                          Icons.search,
+                          size: 100,
+                        ),
+                      ),
+                      Text(''),
                       Text('주차장을 검색하세요.'),
                     ],
                   )),

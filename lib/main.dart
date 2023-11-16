@@ -6,8 +6,10 @@ import 'package:flutter_app/screens/parkingSpace_screen.dart';
 import 'package:flutter_app/screens/search_screen.dart';
 import 'package:flutter_app/screens/setReserveInfo.dart';
 import 'package:flutter_app/screens/finishReserve.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  await initializeDateFormatting();
   runApp(const MyApp());
 }
 

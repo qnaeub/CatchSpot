@@ -98,15 +98,16 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     });
   }
 
-  Future<void> setRealtimeReserve() async {
-    // status=500 에러 발생
+  Future<void> _setRealtimeReserve() async {
     Map<String, dynamic> data = {
+      'vehicle_num': _carnum,
       'phone_number': _phonenum,
-      'vehicle_number': _carnum,
-      'lot_key': _lotKey,
+      'start_time': '2023-11-16 20:00:00',
+      'end_time': '2023-11-16 20:10:00',
+      'lot_key': "L001",
     };
 
-    var response = await post('/setRealtimeReserve/', jsonEncode(data));
+    var response = await post('/reservation/realtime', data);
 
     if (response.statusCode == 200) {
       print('데이터 전송 성공');
@@ -395,6 +396,12 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             // 예약현황 - 진행상태 설정
                             _processState = "예약완료";
                             _setProcessState();
+
+                            // 시간 및 분 출력
+                            print("$_selectedHour시간 $_selectedMinute분 선택");
+
+                            // 예약 서버 전송
+                            //_setRealtimeReserve();
 
                             // 예약 완료 페이지로 이동
                             Navigator.pushNamed(context, '/finish-reserve');

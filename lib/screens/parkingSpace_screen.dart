@@ -33,6 +33,11 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   String _phonenum = "";
   String _parkingLot = "";
   String _reserveDate = "";
+  String _reserveYear = "";
+  String _reserveMonth = "";
+  String _reserveDay = "";
+  String _reserveHour = "";
+  String _reserveMinute = "";
 
   @override
   void initState() {
@@ -172,8 +177,10 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                           height: 465.0,
                           child: TableCalendar(
                             firstDay: DateTime.now(),
-                            lastDay: DateTime.utc(2023, 12, 31),
+                            lastDay: DateTime(DateTime.now().year,
+                                DateTime.now().month, DateTime.now().day + 7),
                             focusedDay: DateTime.now(),
+                            //locale: 'ko-KR',
                             headerStyle: HeaderStyle(
                               formatButtonVisible: false,
                               titleCentered: true,

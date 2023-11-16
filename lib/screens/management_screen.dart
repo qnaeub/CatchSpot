@@ -436,7 +436,21 @@ class _ManageScreenState extends State<ManageScreen> {
         ],
       );
     } else {
-      childWidget = Center(child: Text("예약된 주차장이 없습니다."));
+      childWidget = Center(
+          child: Container(
+              margin: EdgeInsets.fromLTRB(0, 250, 0, 0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    child: Icon(
+                      Icons.cancel_presentation,
+                      size: 100,
+                    ),
+                  ),
+                  Text(''),
+                  Text("예약된 주차장이 없습니다."),
+                ],
+              )));
     }
 
     return Scaffold(
