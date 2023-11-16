@@ -29,7 +29,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _zoneName = "";
   String _processState = "";
   DateTime _datetime = DateTime.now();
-  int _lotKey = -999;
+  String _lotKey = "";
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
   final _hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08'];
@@ -87,7 +87,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
-      _lotKey = _pref.getInt("lotKey") ?? -999;
+      _lotKey = _pref.getString("lotKey") ?? "";
     });
   }
 

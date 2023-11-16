@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
@@ -21,13 +24,12 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  static String parkingLotList = "";
   static List<String> lotNames = [];
-  static List<int> lotKeys = [];
+  static List<String> lotKeys = [];
   late SharedPreferences _pref;
   String _searchItem = "";
   String _parkingLot = "";
-  int _lotKey = -999;
+  String _lotKey = "";
   TextEditingController textController = TextEditingController();
   bool showSearchResult = false;
 
@@ -55,7 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
   _setParkingLot() async {
     setState(() {
       _pref.setString("parkingLot", _parkingLot);
-      _pref.setInt("lotKey", _lotKey);
+      _pref.setString("lotKey", _lotKey);
     });
   }
 
@@ -63,23 +65,23 @@ class _SearchScreenState extends State<SearchScreen> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
-      _lotKey = _pref.getInt("lotKey") ?? -999;
+      _lotKey = _pref.getString("lotKey") ?? "";
     });
   }
 
   Future<void> _getParkingLotList() async {
     var response = await get('/search', {'q': '$_searchItem'});
+    List<dynamic> jsonResponse = response.data;
 
     if (response.statusCode == 200) {
-      print("테스트 결과: $response");
       setState(() {
         lotNames = [];
         lotKeys = [];
-        parkingLotList = response.data['주차장 이름'];
-        lotNames.add(parkingLotList);
+        for (int i = 0; i < jsonResponse.length; i++) {
+          lotNames.add(jsonResponse[i]['주차장 이름']);
+          lotKeys.add(jsonResponse[i]['주차장 key']);
+        }
       });
-      print("테스트 주차장 이름: $parkingLotList");
-      print("테스트 주차장 이름 목록: $lotNames");
     } else {
       print("서버 응답 오류: ${response.statusCode}");
     }
@@ -156,10 +158,9 @@ class _SearchScreenState extends State<SearchScreen> {
                         // 주차장 불러오기
                         await _getParkingLotList();
 
-                        // 주차장 이름 불러오기
-                        //await getParkingLotNames();
-                        print("${parkingLotList}");
-                        print("lot names: ${lotNames}");
+                        // 주차장 이름 및 고유번호 출력
+                        print("주차장 이름: $lotNames");
+                        print("주차장 key: $lotKeys");
 
                         // 주차장 목록 띄우기
                         showSearchResult = true;
@@ -180,7 +181,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         onTap: () {
                           // 선택한 주차장 로컬에 저장
                           _parkingLot = lotNames[index];
-                          //_lotKey = lotKeys[index];
+                          _lotKey = lotKeys[index];
                           _setParkingLot();
                           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
 

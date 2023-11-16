@@ -6,6 +6,7 @@ import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'dart:async';
 
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
@@ -33,11 +34,14 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   String _phonenum = "";
   String _parkingLot = "";
   String _reserveDate = "";
-  String _reserveYear = "";
-  String _reserveMonth = "";
-  String _reserveDay = "";
-  String _reserveHour = "";
-  String _reserveMinute = "";
+  String _reserveYear = "0000";
+  String _reserveMonth = "00";
+  String _reserveDay = "00";
+  String _reserveHour = "00";
+  String _reserveMinute = "00";
+
+  late String _timeString;
+  late Timer _timer;
 
   @override
   void initState() {
@@ -46,6 +50,26 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
     _getCarAndPhonenum();
     _getParkingLot();
     selectedDate = widget.data; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
+    _timeString = _formatDateTime(DateTime.now());
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _getTime());
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _getTime() {
+    final DateTime now = DateTime.now();
+    final String formattedDateTime = _formatDateTime(now);
+    setState(() {
+      _timeString = formattedDateTime;
+    });
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return DateFormat('yyyy.MM.dd HH:mm').format(dateTime);
   }
 
   _setReserveDate() async {
@@ -78,9 +102,8 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final String now = new DateTime.now().toString();
-    String formattedDate =
-        DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
+    final now = new DateTime.now();
+    final String formattedDate = DateFormat("yyyy.MM.dd HH:mm").format(now);
 
     return Scaffold(
       appBar: PreferredSize(
@@ -154,7 +177,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                             selectedDate.value = true;
                             // 날짜 변경
                           },
-                          child: Text("$formattedDate") // 현재시각
+                          child: Text("$_timeString") // 현재시각
                           ),
                       Spacer(flex: 20),
                     ]),
