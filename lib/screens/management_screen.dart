@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageScreen extends StatefulWidget {
@@ -18,6 +19,8 @@ class _ManageScreenState extends State<ManageScreen> {
   String _zoneName = "";
   String _reserveDate = "";
   String _processState = "";
+  DateTime _endDateTime = DateTime.now();
+  //String _endDateTime = "";
   DateTime _datetime = DateTime.now();
   bool isEdit = false;
 
@@ -34,6 +37,7 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingZone();
     _getReserveDate();
     _getProcessState();
+    _getEndDateTime();
   }
 
   _cancelReserve() {
@@ -64,6 +68,13 @@ class _ManageScreenState extends State<ManageScreen> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _datetime = DateTime.parse(_pref.getString("reserveDate") ?? "");
+    });
+  }
+
+  _getEndDateTime() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _endDateTime = DateTime.parse(_pref.getString("endDateTime") ?? "");
     });
   }
 
@@ -262,9 +273,17 @@ class _ManageScreenState extends State<ManageScreen> {
                                   //if ((_datetime.year == DateTime.now().year) &&
                                   //(_datetime.month == DateTime.now().month) &&
                                   //(_datetime.day == DateTime.now().day))
-                                  Text(
-                                      "${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}~"),
-                                  Spacer(flex: 13),
+                                  if (_datetime.day == DateTime.now().day)
+                                    Text(
+                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~")
+                                  else
+                                    Text(
+                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~ ${DateFormat("yyyy.MM.dd HH:mm").format(_endDateTime)}"),
+                                  //Text("${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}~"),
+                                  if (_datetime.day == DateTime.now().day)
+                                    Spacer(flex: 13)
+                                  else
+                                    Spacer(flex: 3),
                                 ],
                               ),
                             ),

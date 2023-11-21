@@ -72,6 +72,8 @@ class _SearchScreenState extends State<SearchScreen> {
   Future<void> _getParkingLotList() async {
     var response = await get('/search', {'q': '$_searchItem'});
     List<dynamic> jsonResponse = response.data;
+    lotNames = [];
+    lotKeys = [];
 
     if (response.statusCode == 200) {
       setState(() {
@@ -142,6 +144,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       // 검색한 단어 로컬에 저장
                       await _setSearchItem();
                       print("검색한 단어: $_searchItem");
+                      print("lotNames : $lotNames");
+                      print("lotNames 길이: ${lotNames.length}");
 
                       if (_searchItem.length < 2) {
                         // 2글자 미만 검색 시 팝업창 띄움

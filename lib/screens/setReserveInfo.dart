@@ -21,6 +21,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   final String now = new DateTime.now().toString();
   String formattedDate = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
   ValueNotifier<bool> isRealTime = ValueNotifier<bool>(true);
+  //DateTime endDateTime = DateTime.utc(2023, 11, 23, 17);
 
   late SharedPreferences _pref;
   String _carnum = "";
@@ -34,8 +35,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   TextEditingController _phonenumController = TextEditingController();
   final _hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08'];
   final _minutes = ['00', '10', '20', '30', '40', '50'];
-  String? _selectedHour = '';
+  String _selectedHour = '';
   String _selectedMinute = '';
+  String startDateTime = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
+  DateTime endDateTime = DateTime.now();
+  //String endDateTime = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
 
   @override
   void initState() {
@@ -49,8 +53,19 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _selectedMinute = _minutes[1];
   }
 
+  _setEndDateTime(_sHour, _sMin) {
+    setState(() {
+      endDateTime = DateTime.utc(_datetime.year, _datetime.month, _datetime.day,
+          _datetime.hour, _datetime.minute);
+      endDateTime = endDateTime.add(Duration(hours: _sHour, minutes: _sMin));
+      _pref.setString("endDateTime", endDateTime.toString());
+    });
+  }
+
   _setProcessState() async {
-    _pref.setString("processState", _processState);
+    setState(() {
+      _pref.setString("processState", _processState);
+    });
   }
 
   _setReserveDate() async {
@@ -65,6 +80,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
       _phonenum = _phonenumController.text;
       _pref.setString("carnum", _carnum);
       _pref.setString("phonenum", _phonenum);
+    });
+  }
+
+  _setSelectHM(_sHour, _sMin) {
+    setState(() {
+      _pref.setInt("selectedHour", _sHour);
+      _pref.setInt("selectedMinute", _sMin);
     });
   }
 
@@ -171,7 +193,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                   "${_datetime.year}.${_datetime.month}.${_datetime.day} (10분 내 입차)") // 현재시각
                             ] else ...[
                               Text(
-                                  "${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}")
+                                  "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))}"),
+                              //Text("${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}")
                             ],
                             Spacer(flex: 10),
                           ]),
@@ -399,6 +422,14 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
 
                             // 시간 및 분 출력
                             print("$_selectedHour시간 $_selectedMinute분 선택");
+
+                            // 테스트
+                            var _sHour = int.parse(_selectedHour);
+                            var _sMin = int.parse(_selectedMinute);
+                            _setEndDateTime(_sHour, _sMin);
+                            _setSelectHM(_sHour, _sMin);
+                            print(
+                                "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                             // 예약 서버 전송
                             //_setRealtimeReserve();
