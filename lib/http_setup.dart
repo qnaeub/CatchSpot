@@ -10,8 +10,11 @@ BaseOptions options = new BaseOptions(
     receiveTimeout: Duration(seconds: 3));
 Dio dio = new Dio(options);
 
-Future<Response> post(String url, Map<String, dynamic> body) async {
-  final response = await dio.post('$baseUrl$url', data: body);
+Future<Response> post(String url, Map<String, dynamic>? body) async {
+  final response = await dio.post('$baseUrl$url',
+      data: body,
+      options:
+          Options(headers: {"Content-Type": "application/json; charset=utf8"}));
 
   return response;
 }

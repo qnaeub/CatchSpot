@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../http_setup.dart';
 
 class ManageScreen extends StatefulWidget {
   const ManageScreen({Key? key}) : super(key: key);
@@ -18,7 +22,8 @@ class _ManageScreenState extends State<ManageScreen> {
   String _parkingLot = "";
   String _zoneName = "";
   String _reserveDate = "";
-  String _processState = "";
+  String _processState = "입차완료";
+  String _reserveKey = "rxvsu1djt4beptv";
   DateTime _endDateTime = DateTime.now();
   //String _endDateTime = "";
   DateTime _datetime = DateTime.now();
@@ -36,7 +41,7 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
-    _getProcessState();
+    //_getProcessState();
     _getEndDateTime();
   }
 
@@ -53,6 +58,25 @@ class _ManageScreenState extends State<ManageScreen> {
       _pref.setString("parkingZone", _zoneName);
       _pref.setString("reserveDate", _reserveDate);
     });
+  }
+
+  Future<void> _cancelReserveDB() async {
+    Map<String, dynamic> data = {
+      'reservation_key': _reserveKey,
+    };
+
+    var response = await post('/reservation/cancel/', data);
+    var jsonResponse = response.data;
+    print("응답 결과1: $response");
+    print("응답 결과2: $jsonResponse");
+
+    if (response.statusCode == 200) {
+      String result = jsonResponse['결과'];
+      print("데이터 전송 성공: 예약 번호 ${result}");
+      print('데이터 전송 성공');
+    } else {
+      print('데이터 전송 실패');
+    }
   }
 
   _setCarAndPhonenum() {
@@ -146,7 +170,8 @@ class _ManageScreenState extends State<ManageScreen> {
                                       // 차량번호 입력칸
                                       width: 200,
                                       height: 30,
-                                      padding: EdgeInsets.fromLTRB(10, 9, 0, 0),
+                                      padding:
+                                          EdgeInsets.fromLTRB(10, 12, 0, 0),
                                       decoration: BoxDecoration(
                                           color: Color(0xffFFFFFF),
                                           border: Border.all(
@@ -236,7 +261,7 @@ class _ManageScreenState extends State<ManageScreen> {
                         top: 15,
                         left: 50,
                         child: Container(
-                          width: 30,
+                          width: 35,
                           decoration: BoxDecoration(
                             color: Color(0xffFFFFFF),
                           ),
@@ -264,7 +289,7 @@ class _ManageScreenState extends State<ManageScreen> {
                           children: <Widget>[
                             Container(
                               // 예약 시간
-                              height: 30,
+                              height: 35,
                               margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
                               child: Row(
                                 children: [
@@ -273,17 +298,19 @@ class _ManageScreenState extends State<ManageScreen> {
                                   //if ((_datetime.year == DateTime.now().year) &&
                                   //(_datetime.month == DateTime.now().month) &&
                                   //(_datetime.day == DateTime.now().day))
-                                  if (_datetime.day == DateTime.now().day)
+                                  if (_datetime.day == DateTime.now().day) ...[
                                     Text(
-                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~")
-                                  else
-                                    Text(
-                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~ ${DateFormat("yyyy.MM.dd HH:mm").format(_endDateTime)}"),
-                                  //Text("${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}~"),
-                                  if (_datetime.day == DateTime.now().day)
+                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~"),
                                     Spacer(flex: 13)
-                                  else
-                                    Spacer(flex: 3),
+                                  ] else ...[
+                                    Text(
+                                        "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~\n${DateFormat("yyyy.MM.dd HH:mm").format(_endDateTime)}"),
+                                    Spacer(flex: 13),
+                                    if (isEdit == true) ...[
+                                      Icon(Icons.edit,
+                                          color: Color(0xffA076F9)),
+                                    ]
+                                  ]
                                 ],
                               ),
                             ),
@@ -334,7 +361,7 @@ class _ManageScreenState extends State<ManageScreen> {
                         top: 15,
                         left: 50,
                         child: Container(
-                          width: 120,
+                          width: 130,
                           decoration: BoxDecoration(
                             color: Color(0xffFFFFFF),
                           ),
@@ -349,6 +376,93 @@ class _ManageScreenState extends State<ManageScreen> {
                       ),
                     ],
                   ),
+                  if (_processState == "입차완료")
+                    Stack(
+                      children: [
+                        Container(
+                          height: 150,
+                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                          decoration: BoxDecoration(
+                            color: Color(0xffFFFFFF),
+                            border:
+                                Border.all(color: Color(0xffD9D9D9), width: 1),
+                          ),
+                          child: Column(
+                            children: <Widget>[
+                              Container(
+                                height: 95,
+                                margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    InkWell(
+                                      onTap: () {
+                                        // 차단기 올림
+                                      },
+                                      child: Container(
+                                        width: 130,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffFFFFFF),
+                                          border: Border.all(
+                                              color: Color(0xffA076F9),
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Center(
+                                            child: Text(
+                                          "차단기\n올림",
+                                          textAlign: TextAlign.center,
+                                        )),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        // 차단기 내림
+                                      },
+                                      child: Container(
+                                        width: 130,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffFFFFFF),
+                                          border: Border.all(
+                                              color: Color(0xffA076F9),
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Center(
+                                            child: Text(
+                                          "차단기\n내림",
+                                          textAlign: TextAlign.center,
+                                        )),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          top: 15,
+                          left: 50,
+                          child: Container(
+                            width: 130,
+                            decoration: BoxDecoration(
+                              color: Color(0xffFFFFFF),
+                            ),
+                            child: Text(
+                              "Controller",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xff6528F7)),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),

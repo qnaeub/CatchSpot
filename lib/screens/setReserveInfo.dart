@@ -31,6 +31,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _processState = "";
   DateTime _datetime = DateTime.now();
   String _lotKey = "";
+  String _reserveKey = "";
   TextEditingController _carnumController = TextEditingController();
   TextEditingController _phonenumController = TextEditingController();
   final _hours = ['00', '01', '02', '03', '04', '05', '06', '07', '08'];
@@ -39,7 +40,6 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String _selectedMinute = '';
   String startDateTime = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
   DateTime endDateTime = DateTime.now();
-  //String endDateTime = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
 
   @override
   void initState() {
@@ -121,18 +121,38 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   }
 
   Future<void> _setRealtimeReserve() async {
-    Map<String, dynamic> data = {
+    String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
+        _datetime.year,
+        _datetime.month,
+        _datetime.day,
+        _datetime.hour,
+        _datetime.minute));
+    String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
+
+    Map<String, dynamic>? data = {
       'vehicle_num': _carnum,
       'phone_number': _phonenum,
-      'start_time': '2023-11-16 20:00:00',
-      'end_time': '2023-11-16 20:10:00',
-      'lot_key': "L001",
+      'start_time': start_time,
+      'end_time': end_time,
+      'lot_key': _lotKey,
     };
 
+    print(
+        "차량번호: ${_carnum}\n전화번호: ${_phonenum}\n시작시각: ${start_time}\n종료시각: ${end_time}\n주차장번호: ${_lotKey}");
+
     var response = await post('/reservation/realtime', data);
+    print("응답 결과(response): ${response}");
+    //Map<String, dynamic> jsonResponse = response.data as Map<String, dynamic>;
+    //String res = "${response}";
+    //print("응답 결과(String): ${res}");
 
     if (response.statusCode == 200) {
       print('데이터 전송 성공');
+      //setState(() {
+      //_reserveKey = jsonResponse['예약 번호'];
+      //_pref.setString("reservation_key", _reserveKey);
+      //});
+      //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
     } else {
       print('데이터 전송 실패');
     }
@@ -432,7 +452,9 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                             // 예약 서버 전송
-                            //_setRealtimeReserve();
+                            if (isRealTime.value) {
+                              //_setRealtimeReserve();
+                            } else {}
 
                             // 예약 완료 페이지로 이동
                             Navigator.pushNamed(context, '/finish-reserve');
