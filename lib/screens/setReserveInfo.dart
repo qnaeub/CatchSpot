@@ -8,6 +8,8 @@ import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'management_screen.dart';
+
 class SetReserveInfo extends StatefulWidget {
   // const SetReserveInfo({Key? key}) : super(key: key);
   ValueNotifier<bool> realTime; // 실시간 예약인지 여부
@@ -24,6 +26,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   //DateTime endDateTime = DateTime.utc(2023, 11, 23, 17);
 
   late SharedPreferences _pref;
+  bool _preEdit = false;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
@@ -48,6 +51,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
+    _getPreEdit();
     isRealTime = widget.realTime;
     _selectedHour = _hours[0];
     _selectedMinute = _minutes[1];
@@ -87,6 +91,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _pref.setInt("selectedHour", _sHour);
       _pref.setInt("selectedMinute", _sMin);
+    });
+  }
+
+  _getPreEdit() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _preEdit = _pref.getBool("preEdit") ?? false;
     });
   }
 
@@ -143,6 +154,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     var response = await post('/reservation/realtime', data);
     print("응답 결과(response): ${response}");
     //Map<String, dynamic> jsonResponse = response.data as Map<String, dynamic>;
+    //print("응답 결과(jsonResponse): ${jsonResponse}");
     //String res = "${response}";
     //print("응답 결과(String): ${res}");
 
@@ -301,141 +313,188 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             ),
                           ),
                         ],
-                        Container(
-                          // 차량번호
-                          height: 30,
-                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.directions_car),
-                              Spacer(flex: 1),
-                              Text("차량번호"),
-                              Spacer(flex: 20),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          // 차량번호 입력칸
-                          width: 270,
-                          height: 35,
-                          margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          decoration: BoxDecoration(
-                              color: Color(0xffFFFFFF),
-                              border: Border.all(
-                                  color: Color(0xffA076F9), width: 1),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: SizedBox(
-                            width: 200.0,
-                            child: TextField(
-                              cursorColor: Color(0xffA076F9),
-                              controller: _carnumController,
-                              style: TextStyle(),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "000가0000",
-                              ),
-                              inputFormatters: [
-                                // 한글 및 숫자로 제한
-                                LengthLimitingTextInputFormatter(8), // 8자리로 제한
+                        if (_preEdit == false) ...[
+                          Container(
+                            // 차량번호
+                            height: 30,
+                            margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.directions_car),
+                                Spacer(flex: 1),
+                                Text("차량번호"),
+                                Spacer(flex: 20),
                               ],
                             ),
                           ),
-                        ),
-                        Container(
-                          // 전화번호
-                          height: 30,
-                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.call),
-                              Spacer(flex: 1),
-                              Text("전화번호"),
-                              Spacer(flex: 20),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          // 전화번호 입력칸
-                          width: 270,
-                          height: 35,
-                          margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                          padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          decoration: BoxDecoration(
-                              color: Color(0xffFFFFFF),
-                              border: Border.all(
-                                  color: Color(0xffA076F9), width: 1),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: SizedBox(
-                            width: 200.0,
-                            child: TextField(
-                              cursorColor: Color(0xffA076F9),
-                              controller: _phonenumController,
-                              style: TextStyle(),
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "01000000000",
+                          Container(
+                            // 차량번호 입력칸
+                            width: 270,
+                            height: 35,
+                            margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            decoration: BoxDecoration(
+                                color: Color(0xffFFFFFF),
+                                border: Border.all(
+                                    color: Color(0xffA076F9), width: 1),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: SizedBox(
+                              width: 200.0,
+                              child: TextField(
+                                cursorColor: Color(0xffA076F9),
+                                controller: _carnumController,
+                                style: TextStyle(),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "000가0000",
+                                ),
+                                inputFormatters: [
+                                  // 한글 및 숫자로 제한
+                                  LengthLimitingTextInputFormatter(
+                                      8), // 8자리로 제한
+                                ],
                               ),
-                              keyboardType: TextInputType.number, // 숫자 키보드 사용
-                              inputFormatters: [
-                                FilteringTextInputFormatter
-                                    .digitsOnly, // 숫자만 입력
-                                LengthLimitingTextInputFormatter(
-                                    11), // 11자리로 제한
+                            ),
+                          ),
+                          Container(
+                            // 전화번호
+                            height: 30,
+                            margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                            child: Row(
+                              children: [
+                                Icon(Icons.call),
+                                Spacer(flex: 1),
+                                Text("전화번호"),
+                                Spacer(flex: 20),
                               ],
                             ),
                           ),
-                        ),
+                          Container(
+                            // 전화번호 입력칸
+                            width: 270,
+                            height: 35,
+                            margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            decoration: BoxDecoration(
+                                color: Color(0xffFFFFFF),
+                                border: Border.all(
+                                    color: Color(0xffA076F9), width: 1),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: SizedBox(
+                              width: 200.0,
+                              child: TextField(
+                                cursorColor: Color(0xffA076F9),
+                                controller: _phonenumController,
+                                style: TextStyle(),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: "01000000000",
+                                ),
+                                keyboardType: TextInputType.number, // 숫자 키보드 사용
+                                inputFormatters: [
+                                  FilteringTextInputFormatter
+                                      .digitsOnly, // 숫자만 입력
+                                  LengthLimitingTextInputFormatter(
+                                      11), // 11자리로 제한
+                                ],
+                              ),
+                            ),
+                          ),
+                        ]
                       ],
                     ),
                   ),
                 ),
-                Container(
-                    height: 50,
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
-                    child: InkWell(
-                        onTap: () {
-                          // 차량번호, 전화번호 데이터 저장
-                          _setCarAndPhonenum();
+                if (_preEdit == false)
+                  Container(
+                      height: 50,
+                      margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      child: InkWell(
+                          onTap: () {
+                            // 차량번호, 전화번호 데이터 저장
+                            _setCarAndPhonenum();
 
-                          if (_carnum == "" || _phonenum == "") {
-                            // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  content: Text("차량번호와 전화번호를 반드시 입력해야 합니다."),
-                                );
-                              },
-                            );
-                          } else if (_carnum.length < 7) {
-                            // 차량번호 7자리 미만 시 안내 팝업창 띄움
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  content: Text("차량번호는 7자리 또는 8자리로 입력해야 합니다."),
-                                );
-                              },
-                            );
-                          } else if (_phonenum.length < 11) {
-                            // 전화번호 11자리 미만 시 안내 팝업창 띄움
-                            showDialog(
-                              context: context,
-                              barrierDismissible: true,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  content: Text("전화번호는 11자리로 입력해야 합니다."),
-                                );
-                              },
-                            );
-                          } else {
-                            if (isRealTime.value) {
-                              _setReserveDate();
+                            if (_carnum == "" || _phonenum == "") {
+                              // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    content: Text("차량번호와 전화번호를 반드시 입력해야 합니다."),
+                                  );
+                                },
+                              );
+                            } else if (_carnum.length < 7) {
+                              // 차량번호 7자리 미만 시 안내 팝업창 띄움
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    content:
+                                        Text("차량번호는 7자리 또는 8자리로 입력해야 합니다."),
+                                  );
+                                },
+                              );
+                            } else if (_phonenum.length < 11) {
+                              // 전화번호 11자리 미만 시 안내 팝업창 띄움
+                              showDialog(
+                                context: context,
+                                barrierDismissible: true,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    content: Text("전화번호는 11자리로 입력해야 합니다."),
+                                  );
+                                },
+                              );
+                            } else {
+                              if (isRealTime.value) {
+                                _setReserveDate();
+                              }
+
+                              // 예약현황 - 진행상태 설정
+                              _processState = "예약완료";
+                              _setProcessState();
+
+                              // 시간 및 분 출력
+                              print("$_selectedHour시간 $_selectedMinute분 선택");
+
+                              // 테스트
+                              var _sHour = int.parse(_selectedHour);
+                              var _sMin = int.parse(_selectedMinute);
+                              _setEndDateTime(_sHour, _sMin);
+                              _setSelectHM(_sHour, _sMin);
+                              print(
+                                  "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
+
+                              // 예약 서버 전송
+                              if (isRealTime.value) {
+                                //_setRealtimeReserve();
+                              } else {}
+
+                              // 예약 완료 페이지로 이동
+                              Navigator.pushNamed(context, '/finish-reserve');
                             }
-
+                          },
+                          child: Container(
+                            // 실시간 예약하기 버튼
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xffFFFFFF),
+                              border: Border.all(color: Color(0xffA076F9)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                                child: Text(
+                                    isRealTime.value ? "실시간 예약하기" : "사전 예약하기")),
+                          )))
+                else
+                  Container(
+                      height: 50,
+                      margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      child: InkWell(
+                          onTap: () {
                             // 예약현황 - 진행상태 설정
                             _processState = "예약완료";
                             _setProcessState();
@@ -452,26 +511,23 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                             // 예약 서버 전송
-                            if (isRealTime.value) {
-                              //_setRealtimeReserve();
-                            } else {}
 
                             // 예약 완료 페이지로 이동
-                            Navigator.pushNamed(context, '/finish-reserve');
-                          }
-                        },
-                        child: Container(
-                          // 실시간 예약하기 버튼
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Color(0xffFFFFFF),
-                            border: Border.all(color: Color(0xffA076F9)),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Center(
-                              child: Text(
-                                  isRealTime.value ? "실시간 예약하기" : "사전 예약하기")),
-                        ))),
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ManageScreen()));
+                          },
+                          child: Container(
+                            // 예약 수정하기 버튼
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xffFFFFFF),
+                              border: Border.all(color: Color(0xffA076F9)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(child: Text("예약 수정하기")),
+                          ))),
               ],
             );
           }),

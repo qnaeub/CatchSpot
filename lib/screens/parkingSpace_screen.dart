@@ -10,18 +10,19 @@ import 'dart:async';
 
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
-  ValueNotifier<bool>
-      data; // selectedDate의 값 받아옴. <사전 예약> 단계에서 [이전] 버튼 눌렀을 때 이 위젯으로 돌아오게 되면 날짜 선택이 아니라 도면 페이지로 시작하는데,
+  ValueNotifier<bool> dateData;
+  // selectedDate의 값 받아옴. <사전 예약> 단계에서 [이전] 버튼 눌렀을 때 이 위젯으로 돌아오게 되면 날짜 선택이 아니라 도면 페이지로 시작하는데,
   // 이걸 막고 날짜 선택 화면을 띄워주기 위함. 필요에 따라서 주차장 이름 등도 같이 필요하다면 같이 전달해주면 될 듯?
-  ParkingSpaceScreen({required this.data});
+  ParkingSpaceScreen({required this.dateData});
 
   @override
   State<ParkingSpaceScreen> createState() => _ParkingSpaceScreenState();
 }
 
 class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
-  ValueNotifier<bool> selectedDate =
-      ValueNotifier<bool>(false); // 날짜 선택할 건가요? > 캘린더 버튼 누르면 true, 아니면 false
+  ValueNotifier<bool> selectedDate = ValueNotifier<bool>(false);
+  // 날짜 선택할 건가요? > 캘린더 버튼 누르면 true, 아니면 false
+  ValueNotifier<bool> isEdit = ValueNotifier<bool>(false);
   DateTime selectedDay = DateTime(
     DateTime.now().year,
     DateTime.now().month,
@@ -30,6 +31,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   DateTime focusedDay = DateTime.now();
 
   late SharedPreferences _pref;
+  bool _preEdit = false;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
@@ -49,7 +51,8 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
     _getReserveDate();
     _getCarAndPhonenum();
     _getParkingLot();
-    selectedDate = widget.data; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
+    _getPreEdit();
+    selectedDate = widget.dateData; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
     _timeString = _formatDateTime(DateTime.now());
     _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _getTime());
   }
@@ -75,6 +78,13 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   _setReserveDate() async {
     setState(() {
       _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _getPreEdit() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _preEdit = _pref.getBool("preEdit") ?? false;
     });
   }
 
@@ -240,7 +250,27 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                     ),
                 ],
               ))),
-              if (_carnum != "" && _phonenum != "")
+              if (_preEdit == true)
+                Container(
+                    height: 50,
+                    margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                    child: InkWell(
+                        onTap: () {
+                          // 주차 예약하기 페이지로 이동
+                          Navigator.pushNamed(context, '/setinfo');
+                        },
+                        child: Container(
+                          // 주차 예약하기 버튼
+                          //width: double.infinity,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Color(0xffFFFFFF),
+                            border: Border.all(color: Color(0xffA076F9)),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Center(child: Text("예약 수정하기")),
+                        )))
+              else if (_carnum != "" && _phonenum != "")
                 Container(
                     height: 50,
                     margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
@@ -295,6 +325,7 @@ class _PreReservationState extends State<PreReservation> {
   ValueNotifier<int> currentPage =
       ValueNotifier<int>(1); // <사전 예약> 위젯에서는 현재 페이지를 변수로 저장하여 왔다 갔다 할 수 있도록 했어요
   late SharedPreferences _pref;
+  bool _preEdit = false;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
@@ -308,12 +339,20 @@ class _PreReservationState extends State<PreReservation> {
     _getReserveDate();
     _getParkingLot();
     _getCarAndPhonenum();
+    _getPreEdit();
   }
 
   _setReserveDate() async {
     setState(() {
       _reserveDate = _datetime.toString();
       _pref.setString("reserveDate", _reserveDate);
+    });
+  }
+
+  _getPreEdit() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _preEdit = _pref.getBool("preEdit") ?? false;
     });
   }
 
@@ -412,7 +451,8 @@ class _PreReservationState extends State<PreReservation> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => ParkingSpaceScreen(
-                                          data: ValueNotifier<bool>(true))));
+                                          dateData:
+                                              ValueNotifier<bool>(true))));
                             },
                           ),
                           Spacer(flex: 1),
@@ -424,7 +464,7 @@ class _PreReservationState extends State<PreReservation> {
                                     MaterialPageRoute(
                                         builder: (context) =>
                                             ParkingSpaceScreen(
-                                                data: ValueNotifier<bool>(
+                                                dateData: ValueNotifier<bool>(
                                                     true))));
                               },
                               child: Text("$formattedDate") // 현재시각
@@ -501,8 +541,10 @@ class _PreReservationState extends State<PreReservation> {
                                                 MaterialPageRoute(
                                                     builder: (context) =>
                                                         ParkingSpaceScreen(
-                                                            data: ValueNotifier<
-                                                                bool>(true))),
+                                                            dateData:
+                                                                ValueNotifier<
+                                                                        bool>(
+                                                                    true))),
                                               );
                                             },
                                             style: OutlinedButton.styleFrom(
@@ -555,7 +597,31 @@ class _PreReservationState extends State<PreReservation> {
                     ],
                   ),
                 )),
-                if (_carnum != "" && _phonenum != "")
+                if (_preEdit == true)
+                  Container(
+                      height: 50,
+                      margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
+                      child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SetReserveInfo(
+                                      realTime: ValueNotifier<bool>(false))),
+                            );
+                          },
+                          child: Container(
+                            // 주차 예약하기 버튼
+                            //width: double.infinity,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xffFFFFFF),
+                              border: Border.all(color: Color(0xffA076F9)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(child: Text("예약 수정하기")),
+                          )))
+                else if (_carnum != "" && _phonenum != "")
                   Container(
                       height: 50,
                       margin: EdgeInsets.fromLTRB(25, 25, 25, 25),

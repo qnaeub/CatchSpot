@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/screens/parkingSpace_screen.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,12 +18,13 @@ class ManageScreen extends StatefulWidget {
 
 class _ManageScreenState extends State<ManageScreen> {
   late SharedPreferences _pref;
+  bool _preEdit = false;
   String _carnum = "";
   String _phonenum = "";
   String _parkingLot = "";
   String _zoneName = "";
   String _reserveDate = "";
-  String _processState = "입차완료";
+  String _processState = "";
   String _reserveKey = "rxvsu1djt4beptv";
   DateTime _endDateTime = DateTime.now();
   //String _endDateTime = "";
@@ -41,12 +43,14 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
-    //_getProcessState();
+    _getProcessState();
     _getEndDateTime();
   }
 
   _cancelReserve() {
+    //_cancelReserveDB();
     setState(() {
+      _preEdit = false;
       _carnum = "";
       _phonenum = "";
       _parkingLot = "";
@@ -57,6 +61,7 @@ class _ManageScreenState extends State<ManageScreen> {
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("parkingZone", _zoneName);
       _pref.setString("reserveDate", _reserveDate);
+      _pref.setBool("preEdit", _preEdit);
     });
   }
 
@@ -77,6 +82,13 @@ class _ManageScreenState extends State<ManageScreen> {
     } else {
       print('데이터 전송 실패');
     }
+  }
+
+  _setPreEdit() {
+    setState(() {
+      _preEdit = true;
+      _pref.setBool("preEdit", _preEdit);
+    });
   }
 
   _setCarAndPhonenum() {
@@ -307,8 +319,24 @@ class _ManageScreenState extends State<ManageScreen> {
                                         "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))} ~\n${DateFormat("yyyy.MM.dd HH:mm").format(_endDateTime)}"),
                                     Spacer(flex: 13),
                                     if (isEdit == true) ...[
-                                      Icon(Icons.edit,
-                                          color: Color(0xffA076F9)),
+                                      IconButton(
+                                        icon: Icon(Icons.edit,
+                                            color: Color(0xffA076F9)),
+                                        onPressed: () {
+                                          _setPreEdit();
+                                          // 날짜 수정
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ParkingSpaceScreen(
+                                                          dateData:
+                                                              ValueNotifier<
+                                                                      bool>(
+                                                                  true))));
+                                        },
+                                        iconSize: 25,
+                                      ),
                                     ]
                                   ]
                                 ],
@@ -358,7 +386,7 @@ class _ManageScreenState extends State<ManageScreen> {
                         ),
                       ),
                       Positioned(
-                        top: 15,
+                        top: 11,
                         left: 50,
                         child: Container(
                           width: 130,
@@ -486,6 +514,7 @@ class _ManageScreenState extends State<ManageScreen> {
                     child: Center(child: Text("예약 취소하기")),
                   ),
                 )),
+          //  && _processState == "예약완료" 조건 넣기
           if (isEdit == false) ...[
             Container(
                 height: 50,
@@ -507,7 +536,7 @@ class _ManageScreenState extends State<ManageScreen> {
                     child: Center(child: Text("예약 변경하기")),
                   ),
                 ))
-          ] else ...[
+          ] else if (isEdit == true) ...[
             Container(
                 height: 50,
                 margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
