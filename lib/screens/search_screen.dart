@@ -70,22 +70,27 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> _getParkingLotList() async {
-    var response = await get('/search', {'q': '$_searchItem'});
-    List<dynamic> jsonResponse = response.data;
-    lotNames = [];
-    lotKeys = [];
+    try {
+      var response = await get('/search', {'q': '$_searchItem'});
+      List<dynamic> jsonResponse = response.data;
+      lotNames = [];
+      lotKeys = [];
 
-    if (response.statusCode == 200) {
-      setState(() {
-        lotNames = [];
-        lotKeys = [];
-        for (int i = 0; i < jsonResponse.length; i++) {
-          lotNames.add(jsonResponse[i]['주차장 이름']);
-          lotKeys.add(jsonResponse[i]['주차장 key']);
-        }
-      });
-    } else {
-      print("서버 응답 오류: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        setState(() {
+          lotNames = [];
+          lotKeys = [];
+          for (int i = 0; i < jsonResponse.length; i++) {
+            lotNames.add(jsonResponse[i]['주차장 이름']);
+            lotKeys.add(jsonResponse[i]['주차장 key']);
+          }
+        });
+      } else {
+        print("서버 응답 오류: ${response.statusCode}");
+      }
+    } catch (e) {
+      lotNames = [];
+      lotKeys = [];
     }
   }
 
@@ -162,12 +167,26 @@ class _SearchScreenState extends State<SearchScreen> {
                         // 주차장 불러오기
                         await _getParkingLotList();
 
-                        // 주차장 이름 및 고유번호 출력
-                        print("주차장 이름: $lotNames");
-                        print("주차장 key: $lotKeys");
+                        if (lotNames.isEmpty) {
+                          // 검색된 결과 없음
+                          showDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                content:
+                                    Text("'${_searchItem}'로 검색한 결과가 없습니다."),
+                              );
+                            },
+                          );
+                        } else {
+                          // 주차장 이름 및 고유번호 출력
+                          print("주차장 이름: $lotNames");
+                          print("주차장 key: $lotKeys");
 
-                        // 주차장 목록 띄우기
-                        showSearchResult = true;
+                          // 주차장 목록 띄우기
+                          showSearchResult = true;
+                        }
                       }
                     },
                     iconSize: 25.0,

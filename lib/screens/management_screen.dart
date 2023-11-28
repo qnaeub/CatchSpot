@@ -43,7 +43,7 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
-    _getProcessState();
+    //_getProcessState();
     _getEndDateTime();
   }
 
@@ -56,12 +56,14 @@ class _ManageScreenState extends State<ManageScreen> {
       _parkingLot = "";
       _zoneName = "";
       _reserveDate = "";
+      _processState = "";
       _pref.setString("carnum", _carnum);
       _pref.setString("phonenum", _phonenum);
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("parkingZone", _zoneName);
       _pref.setString("reserveDate", _reserveDate);
       _pref.setBool("preEdit", _preEdit);
+      _pref.setString("processState", _processState);
     });
   }
 
@@ -147,7 +149,70 @@ class _ManageScreenState extends State<ManageScreen> {
   Widget build(BuildContext context) {
     Widget childWidget;
 
-    if (_carnum != "" && _phonenum != "") {
+    if (_processState == "출차완료") {
+      childWidget = Center(
+        child: Column(
+          children: <Widget>[
+            Container(
+                margin: EdgeInsets.fromLTRB(0, 100, 0, 25),
+                child: Text(
+                  "주차 요금 정산",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                )),
+            Container(
+                child: DataTable(
+              columns: [
+                DataColumn(label: Container()),
+                DataColumn(label: Container())
+              ],
+              rows: [
+                DataRow(cells: [
+                  DataCell(Text("차량번호",
+                      style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataCell(Text("${_carnum}"))
+                ]),
+                DataRow(cells: [
+                  DataCell(Text("입차시각",
+                      style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataCell(Text("2000-00-00 00:00:00"))
+                ]),
+                DataRow(cells: [
+                  DataCell(Text("정산시각",
+                      style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataCell(Text("2000-00-00 00:00:00"))
+                ]),
+                DataRow(cells: [
+                  DataCell(Text("결제금액",
+                      style: TextStyle(fontWeight: FontWeight.bold))),
+                  DataCell(Text("0원"))
+                ]),
+                DataRow(cells: [DataCell(Container()), DataCell(Container())]),
+              ],
+            )),
+            InkWell(
+                onTap: () {
+                  // 로컬 예약 내역 삭제
+                  _cancelReserve();
+                },
+                child: Container(
+                  //width: 250,
+                  margin: EdgeInsets.fromLTRB(50, 50, 50, 0),
+                  padding: EdgeInsets.fromLTRB(0, 15, 0, 15),
+                  decoration: BoxDecoration(
+                    color: Color(0xffFFFFFF),
+                    border: Border.all(color: Color(0xffA076F9), width: 1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Center(
+                      child: Text(
+                    "확인",
+                    textAlign: TextAlign.center,
+                  )),
+                )),
+          ],
+        ),
+      );
+    } else if (_carnum != "" && _phonenum != "") {
       childWidget = Column(
         children: <Widget>[
           Expanded(

@@ -212,8 +212,12 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                         if (click == true && _zoneName == "A005") ...[
                           Center(
                               child: Text(
-                            "Catch Spot!",
-                            style: TextStyle(color: Color(0xffFFFFFF)),
+                            "Catch\nSpot!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color(0xffFFFFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23),
                           )),
                         ],
                         Spacer(),
@@ -243,8 +247,12 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                         if (click == true && _zoneName == "A006") ...[
                           Center(
                               child: Text(
-                            "Catch Spot!",
-                            style: TextStyle(color: Color(0xffFFFFFF)),
+                            "Catch\nSpot!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color(0xffFFFFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23),
                           )),
                         ],
                         Spacer(),
@@ -274,8 +282,12 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                         if (click == true && _zoneName == "A007") ...[
                           Center(
                               child: Text(
-                            "Catch Spot!",
-                            style: TextStyle(color: Color(0xffFFFFFF)),
+                            "Catch\nSpot!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color(0xffFFFFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23),
                           )),
                         ],
                         Spacer(),
@@ -305,8 +317,12 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                         if (click == true && _zoneName == "A008") ...[
                           Center(
                               child: Text(
-                            "Catch Spot!",
-                            style: TextStyle(color: Color(0xffFFFFFF)),
+                            "Catch\nSpot!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color(0xffFFFFFF),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 23),
                           )),
                         ],
                         Spacer(),

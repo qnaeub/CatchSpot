@@ -132,41 +132,47 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   }
 
   Future<void> _setRealtimeReserve() async {
-    String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
-        _datetime.year,
-        _datetime.month,
-        _datetime.day,
-        _datetime.hour,
-        _datetime.minute));
-    String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
+    DateTime start_time = DateTime.utc(_datetime.year, _datetime.month,
+        _datetime.day, _datetime.hour, _datetime.minute);
+    DateTime end_time = endDateTime;
+    //String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
+    //_datetime.year,
+    //_datetime.month,
+    //_datetime.day,
+    //_datetime.hour,
+    //_datetime.minute));
+    //String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
 
     Map<String, dynamic>? data = {
       'vehicle_num': _carnum,
       'phone_number': _phonenum,
-      'start_time': start_time,
-      'end_time': end_time,
+      'start_time': start_time.toIso8601String(),
+      'end_time': end_time.toIso8601String(),
       'lot_key': _lotKey,
     };
 
     print(
-        "차량번호: ${_carnum}\n전화번호: ${_phonenum}\n시작시각: ${start_time}\n종료시각: ${end_time}\n주차장번호: ${_lotKey}");
+        "차량번호: ${_carnum}\n전화번호: ${_phonenum}\n시작시각: ${start_time.toIso8601String()}\n종료시각: ${end_time.toIso8601String()}\n주차장번호: ${_lotKey}");
+    try {
+      var response = await post('/reservation/realtime', data);
+      print("응답 결과(response): ${response}");
+      //Map<String, dynamic> jsonResponse = response.data as Map<String, dynamic>;
+      //print("응답 결과(jsonResponse): ${jsonResponse}");
+      //String res = "${response}";
+      //print("응답 결과(String): ${res}");
 
-    var response = await post('/reservation/realtime', data);
-    print("응답 결과(response): ${response}");
-    //Map<String, dynamic> jsonResponse = response.data as Map<String, dynamic>;
-    //print("응답 결과(jsonResponse): ${jsonResponse}");
-    //String res = "${response}";
-    //print("응답 결과(String): ${res}");
-
-    if (response.statusCode == 200) {
-      print('데이터 전송 성공');
-      //setState(() {
-      //_reserveKey = jsonResponse['예약 번호'];
-      //_pref.setString("reservation_key", _reserveKey);
-      //});
-      //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
-    } else {
-      print('데이터 전송 실패');
+      if (response.statusCode == 200) {
+        print('데이터 전송 성공');
+        //setState(() {
+        //_reserveKey = jsonResponse['예약 번호'];
+        //_pref.setString("reservation_key", _reserveKey);
+        //});
+        //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("==================에러: ${e}=======================");
     }
   }
 
@@ -332,7 +338,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             width: 270,
                             height: 35,
                             margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
                             decoration: BoxDecoration(
                                 color: Color(0xffFFFFFF),
                                 border: Border.all(
@@ -374,7 +380,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             width: 270,
                             height: 35,
                             margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                            padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
                             decoration: BoxDecoration(
                                 color: Color(0xffFFFFFF),
                                 border: Border.all(
@@ -470,7 +476,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
 
                               // 예약 서버 전송
                               if (isRealTime.value) {
-                                //_setRealtimeReserve();
+                                _setRealtimeReserve();
                               } else {}
 
                               // 예약 완료 페이지로 이동

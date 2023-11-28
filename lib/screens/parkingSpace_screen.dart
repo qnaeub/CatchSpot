@@ -148,22 +148,23 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                         Spacer(flex: 1),
                         Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                         Spacer(flex: 20),
-                        InkWell(
-                          onTap: () {
-                            // 주차장 선택 페이지로 이동
-                            Navigator.pushNamed(context, '/search');
-                          },
-                          child: Container(
-                            // 변경 버튼
-                            width: 55,
-                            height: 30,
-                            decoration: BoxDecoration(
-                                color: Color(0xffFFFFFF),
-                                border: Border.all(color: Color(0xffA076F9)),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Center(child: Text("변경")),
-                          ),
-                        )
+                        if (_preEdit == false)
+                          InkWell(
+                            onTap: () {
+                              // 주차장 선택 페이지로 이동
+                              Navigator.pushNamed(context, '/search');
+                            },
+                            child: Container(
+                              // 변경 버튼
+                              width: 55,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                  color: Color(0xffFFFFFF),
+                                  border: Border.all(color: Color(0xffA076F9)),
+                                  borderRadius: BorderRadius.circular(10)),
+                              child: Center(child: Text("변경")),
+                            ),
+                          )
                       ],
                     ),
                   ),
@@ -416,23 +417,24 @@ class _PreReservationState extends State<PreReservation> {
                             Spacer(flex: 1),
                             Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                             Spacer(flex: 20),
-                            InkWell(
-                              onTap: () {
-                                // 주차장 선택 페이지로 이동
-                                Navigator.pushNamed(context, '/search');
-                              },
-                              child: Container(
-                                // 변경 버튼
-                                width: 55,
-                                height: 30,
-                                decoration: BoxDecoration(
-                                    color: Color(0xffFFFFFF),
-                                    border:
-                                        Border.all(color: Color(0xffA076F9)),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Center(child: Text("변경")),
-                              ),
-                            )
+                            if (_preEdit == false)
+                              InkWell(
+                                onTap: () {
+                                  // 주차장 선택 페이지로 이동
+                                  Navigator.pushNamed(context, '/search');
+                                },
+                                child: Container(
+                                  // 변경 버튼
+                                  width: 55,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                      color: Color(0xffFFFFFF),
+                                      border:
+                                          Border.all(color: Color(0xffA076F9)),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Center(child: Text("변경")),
+                                ),
+                              )
                           ],
                         ),
                       ),
