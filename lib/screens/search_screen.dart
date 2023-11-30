@@ -69,6 +69,21 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  Future<void> _getParkingLotInfo(lotKey) async {
+    try {
+      var response = await get('/status/${lotKey}', {});
+      Map<String, dynamic> jsonResponse = response.data;
+
+      print("결과: $jsonResponse");
+
+      print("총 주차 자리 수: ${jsonResponse['총 주차 자리 수']}");
+      print("남은 사전 예약 구역 번호: ${jsonResponse['남은 사전 예약 구역 번호']}");
+      print("실시간 예약 가능 구역 번호: ${jsonResponse['일반(실시간) 예약 가능 구역 번호']}");
+    } catch (e) {
+      print("에러: ${e}");
+    }
+  }
+
   Future<void> _getParkingLotList() async {
     try {
       var response = await get('/search', {'q': '$_searchItem'});
@@ -207,6 +222,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           _lotKey = lotKeys[index];
                           _setParkingLot();
                           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
+
+                          // 주차장의 정보 출력
+                          _getParkingLotInfo(_lotKey);
 
                           // 주차 구역 페이지로 이동
                           Navigator.pushNamed(context, '/parking-space');

@@ -195,7 +195,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                   print("Click");
                   setState(() {
                     click = true;
-                    _zoneName = "A005";
+                    _zoneName = "Z002";
                     _setParkingZone();
                   });
                 },
@@ -209,7 +209,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                     child: Column(
                       children: [
                         Spacer(),
-                        if (click == true && _zoneName == "A005") ...[
+                        if (click == true && _zoneName == "Z002") ...[
                           Center(
                               child: Text(
                             "Catch\nSpot!",
@@ -229,7 +229,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                   print("Click");
                   setState(() {
                     click = true;
-                    _zoneName = "A006";
+                    _zoneName = "Z004";
                     _setParkingZone();
                   });
                 },
@@ -244,7 +244,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                     child: Column(
                       children: [
                         Spacer(),
-                        if (click == true && _zoneName == "A006") ...[
+                        if (click == true && _zoneName == "Z004") ...[
                           Center(
                               child: Text(
                             "Catch\nSpot!",
@@ -264,7 +264,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                   print("Click");
                   setState(() {
                     click = true;
-                    _zoneName = "A007";
+                    _zoneName = "Z006";
                     _setParkingZone();
                   });
                 },
@@ -279,7 +279,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                     child: Column(
                       children: [
                         Spacer(),
-                        if (click == true && _zoneName == "A007") ...[
+                        if (click == true && _zoneName == "Z006") ...[
                           Center(
                               child: Text(
                             "Catch\nSpot!",
@@ -299,7 +299,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                   print("Click");
                   setState(() {
                     click = true;
-                    _zoneName = "A008";
+                    _zoneName = "Z008";
                     _setParkingZone();
                   });
                 },
@@ -314,7 +314,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                     child: Column(
                       children: [
                         Spacer(),
-                        if (click == true && _zoneName == "A008") ...[
+                        if (click == true && _zoneName == "Z008") ...[
                           Center(
                               child: Text(
                             "Catch\nSpot!",

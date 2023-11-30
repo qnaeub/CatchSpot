@@ -22,3 +22,9 @@ Future<Response> get(String url, Map<String, dynamic>? body) async {
 
   return response;
 }
+
+Future<Response> put(String url, Map<String, dynamic>? body) async {
+  final response = await dio.put('$baseUrl$url', data: body);
+
+  return response;
+}

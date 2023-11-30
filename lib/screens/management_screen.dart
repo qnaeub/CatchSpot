@@ -43,12 +43,12 @@ class _ManageScreenState extends State<ManageScreen> {
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
-    //_getProcessState();
+    _getProcessState();
     _getEndDateTime();
   }
 
   _cancelReserve() {
-    //_cancelReserveDB();
+    //_cancelReserveDB(_reserveKey);
     setState(() {
       _preEdit = false;
       _carnum = "";
@@ -67,22 +67,22 @@ class _ManageScreenState extends State<ManageScreen> {
     });
   }
 
-  Future<void> _cancelReserveDB() async {
-    Map<String, dynamic> data = {
-      'reservation_key': _reserveKey,
-    };
+  Future<void> _cancelReserveDB(reserveKey) async {
+    print("예약키: '${_reserveKey}'");
+    try {
+      var response = await post('/reservation/cancel/$reserveKey', {});
+      Map<String, dynamic> jsonResponse = response.data;
+      print("응답 결과1: $response");
+      print("응답 결과2: $jsonResponse");
 
-    var response = await post('/reservation/cancel/', data);
-    var jsonResponse = response.data;
-    print("응답 결과1: $response");
-    print("응답 결과2: $jsonResponse");
-
-    if (response.statusCode == 200) {
-      String result = jsonResponse['결과'];
-      print("데이터 전송 성공: 예약 번호 ${result}");
-      print('데이터 전송 성공');
-    } else {
-      print('데이터 전송 실패');
+      if (response.statusCode == 200) {
+        String result = jsonResponse['결과'];
+        print("데이터 전송 성공: 예약 번호 ${result}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("###### _cancelReserveDB() 데이터 전송 실패: ${e} ######");
     }
   }
 
@@ -566,7 +566,9 @@ class _ManageScreenState extends State<ManageScreen> {
                 margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
                 child: InkWell(
                   onTap: () {
-                    _cancelReserve();
+                    // 수정해야됨...
+                    //_cancelReserve();
+                    _cancelReserveDB(_reserveKey);
                     Navigator.pushNamed(context, '/manage');
                   },
                   child: Container(

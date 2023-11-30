@@ -94,6 +94,13 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     });
   }
 
+  _setPreEdit() {
+    setState(() {
+      _preEdit = false;
+      _pref.setBool("preEdit", _preEdit);
+    });
+  }
+
   _getPreEdit() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
@@ -131,48 +138,102 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     });
   }
 
-  Future<void> _setRealtimeReserve() async {
-    DateTime start_time = DateTime.utc(_datetime.year, _datetime.month,
-        _datetime.day, _datetime.hour, _datetime.minute);
-    DateTime end_time = endDateTime;
-    //String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
-    //_datetime.year,
-    //_datetime.month,
-    //_datetime.day,
-    //_datetime.hour,
-    //_datetime.minute));
-    //String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
+  Future<void> _setReserve() async {
+    String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
+        _datetime.year,
+        _datetime.month,
+        _datetime.day,
+        _datetime.hour,
+        _datetime.minute));
+    String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
 
-    Map<String, dynamic>? data = {
-      'vehicle_num': _carnum,
-      'phone_number': _phonenum,
-      'start_time': start_time.toIso8601String(),
-      'end_time': end_time.toIso8601String(),
-      'lot_key': _lotKey,
-    };
+    Map<String, dynamic>? data;
 
-    print(
-        "차량번호: ${_carnum}\n전화번호: ${_phonenum}\n시작시각: ${start_time.toIso8601String()}\n종료시각: ${end_time.toIso8601String()}\n주차장번호: ${_lotKey}");
+    if (isRealTime.value) {
+      data = {
+        'vehicle_num': _carnum,
+        'phone_number': _phonenum,
+        'start_time': start_time,
+        'end_time': end_time,
+        'lot_key': _lotKey,
+      };
+    } else {
+      data = {
+        'vehicle_num': _carnum,
+        'phone_number': _phonenum,
+        'start_time': start_time,
+        'end_time': end_time,
+        'lot_key': _lotKey,
+        'zone_key': _zoneName,
+      };
+      print("사전을 탐\n시작: $start_time\n종료: $end_time\n구역: $_zoneName");
+    }
+
     try {
-      var response = await post('/reservation/realtime', data);
-      print("응답 결과(response): ${response}");
-      //Map<String, dynamic> jsonResponse = response.data as Map<String, dynamic>;
-      //print("응답 결과(jsonResponse): ${jsonResponse}");
-      //String res = "${response}";
-      //print("응답 결과(String): ${res}");
+      var response;
+      if (isRealTime.value) {
+        response = await post('/reservation/realtime', data);
+      } else {
+        response = await post('/reservation/pre', data);
+      }
+
+      Map<String, dynamic> jsonResponse = response.data;
 
       if (response.statusCode == 200) {
-        print('데이터 전송 성공');
-        //setState(() {
-        //_reserveKey = jsonResponse['예약 번호'];
-        //_pref.setString("reservation_key", _reserveKey);
-        //});
+        print(
+            '#################### _setReserve() 데이터 전송 성공 ####################');
+        setState(() {
+          _reserveKey = jsonResponse['예약 번호'];
+          _pref.setString("reservation_key", _reserveKey);
+        });
         //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print("==================에러: ${e}=======================");
+      print("#################### _setReserve() 에러: ${e} ####################");
+    }
+  }
+
+  Future<void> _editReserve() async {
+    String start_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.utc(
+        _datetime.year,
+        _datetime.month,
+        _datetime.day,
+        _datetime.hour,
+        _datetime.minute));
+    String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
+
+    Map<String, dynamic>? data;
+    if (_preEdit) {
+      data = {
+        'reservation_key': _reserveKey,
+        'start_time': start_time,
+        'end_time': end_time,
+        'lot_key': _lotKey,
+        'zone_key': _zoneName,
+      };
+    }
+
+    try {
+      var response;
+      if (_preEdit) {
+        response = await put('/reservation/preupdate', data);
+      } else {
+        response = await put('/reservation/realtimeupdate', data);
+      }
+      Map<String, dynamic> jsonResponse = response.data;
+
+      if (response.statusCode == 200) {
+        print(
+            '#################### _editReserve() 데이터 전송 성공 ####################');
+        print("결과: ${jsonResponse['결과']}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print(
+          "#################### _editReserve() 데이터 전송 실패: ${e} ####################");
     }
   }
 
@@ -475,9 +536,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                   "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                               // 예약 서버 전송
-                              if (isRealTime.value) {
-                                _setRealtimeReserve();
-                              } else {}
+                              _setReserve();
 
                               // 예약 완료 페이지로 이동
                               Navigator.pushNamed(context, '/finish-reserve');
@@ -516,7 +575,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             print(
                                 "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
-                            // 예약 서버 전송
+                            // 예약 변경 서버 전송
+                            _editReserve();
+
+                            // 예약 편집 아님 상태로 변경
+                            _setPreEdit();
 
                             // 예약 완료 페이지로 이동
                             Navigator.push(
