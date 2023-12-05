@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'dart:async';
 
+import '../http_setup.dart';
+
 class ParkingSpaceScreen extends StatefulWidget {
   // const ParkingSpaceScreen({Key? key}) : super(key: key);
   ValueNotifier<bool> dateData;
@@ -379,6 +381,18 @@ class _PreReservationState extends State<PreReservation> {
     });
   }
 
+  Future<void> _getAvailableDate() async {
+    String data = DateFormat("yyyy-MM-dd").format(_datetime);
+    try {
+      var response = await get('/reservation/available/${data}', {});
+      Map<String, dynamic> jsonResponse = response.data;
+      print("jsonResponse: ${jsonResponse}");
+      print("#################### _getAvailableDate() success");
+    } catch (e) {
+      print("#################### _getAvailableData() error: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     String formattedDate =
@@ -522,6 +536,7 @@ class _PreReservationState extends State<PreReservation> {
                                           time.hour,
                                           time.minute);
                                       _setReserveDate();
+                                      _getAvailableDate();
                                       print("예약날짜: ${_reserveDate}");
                                     },
                                   )),

@@ -68,21 +68,48 @@ class _ManageScreenState extends State<ManageScreen> {
   }
 
   Future<void> _cancelReserveDB(reserveKey) async {
-    print("예약키: '${_reserveKey}'");
+    print("#################### 예약키: '${reserveKey}'");
+    Map<String, dynamic>? data = {
+      'reservation_key': _reserveKey,
+    };
+
     try {
-      var response = await post('/reservation/cancel/$reserveKey', {});
+      var response = await post('/reservation/cancel', data);
       Map<String, dynamic> jsonResponse = response.data;
-      print("응답 결과1: $response");
-      print("응답 결과2: $jsonResponse");
+      print("#################### 응답 결과1: $response");
+      print("#################### 응답 결과2: $jsonResponse");
 
       if (response.statusCode == 200) {
         String result = jsonResponse['결과'];
-        print("데이터 전송 성공: 예약 번호 ${result}");
+        print("#################### 데이터 전송 성공: 예약 번호 ${result}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print("###### _cancelReserveDB() 데이터 전송 실패: ${e} ######");
+      print("#################### _cancelReserveDB() 데이터 전송 실패: ${e}");
+    }
+  }
+
+  Future<void> _editReserve() async {
+    Map<String, dynamic>? data = {
+      'reservation_key': _reserveKey,
+      'new_vehicle_num': _carnum,
+      'new_phone_number': _phonenum,
+    };
+    print("#################### _editReserve() data: ${data}");
+
+    try {
+      var response = await put('/reservation/update', data);
+      Map<String, dynamic> jsonResponse = response.data;
+
+      if (response.statusCode == 200) {
+        print('#################### _editReserve() 데이터 전송 성공');
+        print("결과: ${jsonResponse['결과']}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("#################### _editReserve() 데이터 전송 실패: ${e}");
     }
   }
 
@@ -582,7 +609,7 @@ class _ManageScreenState extends State<ManageScreen> {
                   ),
                 )),
           //  && _processState == "예약완료" 조건 넣기
-          if (isEdit == false) ...[
+          if (isEdit == false && _processState == "예약완료") ...[
             Container(
                 height: 50,
                 margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
@@ -646,6 +673,10 @@ class _ManageScreenState extends State<ManageScreen> {
                         },
                       );
                     } else {
+                      // 예약 수정 서버 전달
+                      _editReserve();
+
+                      // isEdit false로 변경
                       setState(() {
                         isEdit = false;
                       });

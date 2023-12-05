@@ -32,6 +32,8 @@ class _SearchScreenState extends State<SearchScreen> {
   String _lotKey = "";
   TextEditingController textController = TextEditingController();
   bool showSearchResult = false;
+  List<String> _preLot = [];
+  List<String> _realLot = [];
 
   @override
   void initState() {
@@ -44,6 +46,13 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       _searchItem = textController.text;
       _pref.setString("searchItem", _searchItem);
+    });
+  }
+
+  _setLotSpace() async {
+    setState(() {
+      _pref.setStringList("preLot", _preLot);
+      _pref.setStringList("realLot", _realLot);
     });
   }
 
@@ -74,13 +83,18 @@ class _SearchScreenState extends State<SearchScreen> {
       var response = await get('/status/${lotKey}', {});
       Map<String, dynamic> jsonResponse = response.data;
 
-      print("결과: $jsonResponse");
+      print("#################### 결과: $jsonResponse");
 
       print("총 주차 자리 수: ${jsonResponse['총 주차 자리 수']}");
       print("남은 사전 예약 구역 번호: ${jsonResponse['남은 사전 예약 구역 번호']}");
-      print("실시간 예약 가능 구역 번호: ${jsonResponse['일반(실시간) 예약 가능 구역 번호']}");
+      print("실시간 예약 가능 구역 번호: ${jsonResponse['실시간 예약 가능 구역 번호']}");
+      _preLot = List<String>.from(jsonResponse['남은 사전 예약 구역 번호'] as List);
+      _realLot = List<String>.from(jsonResponse['실시간 예약 가능 구역 번호'] as List);
+      _setLotSpace();
+      print("#################### _preLot: ${_preLot}");
+      print("#################### _realLot: ${_realLot}");
     } catch (e) {
-      print("에러: ${e}");
+      print("#################### 에러: ${e}");
     }
   }
 

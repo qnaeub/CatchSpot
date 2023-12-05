@@ -157,6 +157,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         'end_time': end_time,
         'lot_key': _lotKey,
       };
+      print("#################### 실시간 예약 data 설정");
     } else {
       data = {
         'vehicle_num': _carnum,
@@ -166,7 +167,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         'lot_key': _lotKey,
         'zone_key': _zoneName,
       };
-      print("사전을 탐\n시작: $start_time\n종료: $end_time\n구역: $_zoneName");
+      print(
+          "#################### 사전 예약 data 설정\n시작: $start_time\n종료: $end_time\n구역: $_zoneName");
     }
 
     try {
@@ -180,18 +182,18 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
       Map<String, dynamic> jsonResponse = response.data;
 
       if (response.statusCode == 200) {
-        print(
-            '#################### _setReserve() 데이터 전송 성공 ####################');
+        print('#################### _setReserve() 데이터 전송 성공');
         setState(() {
           _reserveKey = jsonResponse['예약 번호'];
           _pref.setString("reservation_key", _reserveKey);
         });
         //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
+        print("데이터 전송 성공: ${jsonResponse}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print("#################### _setReserve() 에러: ${e} ####################");
+      print("#################### _setReserve() 에러: ${e}");
     }
   }
 
