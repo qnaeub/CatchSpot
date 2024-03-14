@@ -532,6 +532,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                 Container(
                   width: 90,
                   height: 150,
+                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                   decoration: BoxDecoration(
                     color: Color(0xffD9D9D9),
                     borderRadius: BorderRadius.circular(10),
@@ -577,6 +578,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                 Container(
                   width: 90,
                   height: 150,
+                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                   decoration: BoxDecoration(
                     color: Color(0xffD9D9D9),
                     borderRadius: BorderRadius.circular(10),
@@ -622,6 +624,7 @@ class ParkingLotAPreState extends State<ParkingLotAPre> {
                 Container(
                   width: 90,
                   height: 150,
+                  margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
                   decoration: BoxDecoration(
                     color: Color(0xffD9D9D9),
                     borderRadius: BorderRadius.circular(10),

@@ -47,6 +47,8 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
   late String _timeString;
   late Timer _timer;
 
+  String _processState = "";
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +56,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
     _getCarAndPhonenum();
     _getParkingLot();
     _getPreEdit();
+    _getProcessState();
     selectedDate = widget.dateData; // initState() 단에서 전달받은 데이터를 변수에 할당해주기
     _timeString = _formatDateTime(DateTime.now());
     _timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _getTime());
@@ -110,6 +113,16 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
     });
+  }
+
+  // 예약 현황 불러오기
+  _getProcessState() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _processState = _pref.getString("processState") ?? "";
+    });
+
+    print("_getProcessState: ${_processState}");
   }
 
   @override
@@ -273,7 +286,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                           ),
                           child: Center(child: Text("예약 수정하기")),
                         )))
-              else if (_carnum != "" && _phonenum != "")
+              else if (_processState == "예약완료" || _processState == "주차완료")
                 Container(
                     height: 50,
                     margin: EdgeInsets.fromLTRB(25, 25, 25, 25),
@@ -335,6 +348,8 @@ class _PreReservationState extends State<PreReservation> {
   String _reserveDate = "";
   DateTime _datetime = DateTime.now();
 
+  String _processState = "";
+
   @override
   void initState() {
     super.initState();
@@ -343,6 +358,7 @@ class _PreReservationState extends State<PreReservation> {
     _getParkingLot();
     _getCarAndPhonenum();
     _getPreEdit();
+    _getProcessState();
   }
 
   _setReserveDate() async {
@@ -378,6 +394,14 @@ class _PreReservationState extends State<PreReservation> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _parkingLot = _pref.getString("parkingLot") ?? "";
+    });
+  }
+
+  // 예약 현황 불러오기
+  _getProcessState() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _processState = _pref.getString("processState") ?? "";
     });
   }
 
@@ -638,7 +662,7 @@ class _PreReservationState extends State<PreReservation> {
                             ),
                             child: Center(child: Text("예약 수정하기")),
                           )))
-                else if (_carnum != "" && _phonenum != "")
+                else if (_processState == "예약완료" || _processState == "주차완료")
                   Container(
                       height: 50,
                       margin: EdgeInsets.fromLTRB(25, 25, 25, 25),

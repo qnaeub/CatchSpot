@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,12 @@ import 'package:flutter_app/http_setup.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'dart:math';
+import 'dart:async';
 
 import 'management_screen.dart';
 
@@ -44,6 +51,35 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   String startDateTime = DateFormat("yyyy.MM.dd HH:mm").format(DateTime.now());
   DateTime endDateTime = DateTime.now();
 
+  // STT Setting
+  bool _hasSpeech = false;
+  bool _logEvents = false;
+  bool _onDevice = false;
+  final TextEditingController _pauseForController =
+      TextEditingController(text: '3');
+  final TextEditingController _listenForController =
+      TextEditingController(text: '30');
+  double level = 0.0;
+  double minSoundLevel = 50000;
+  double maxSoundLevel = -50000;
+  String lastWords = '';
+  String lastError = '';
+  String lastStatus = '';
+  String _currentLocaleId = '';
+  List<LocaleName> _localeNames = [];
+  final SpeechToText speech = SpeechToText();
+  String _speakItem = "";
+  bool _isVoiceReserve = false;
+
+  // TTS Setting
+  FlutterTts flutterTts = FlutterTts();
+  String language = "ko-KR";
+  Map<String, String> voice = {"name": "ko-kr-x-ism-local", "locale": "ko-KR"};
+  String engine = "com.google.android.tts";
+  double volume = 0.8;
+  double pitch = 1.0;
+  double rate = 0.5;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +91,17 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     isRealTime = widget.realTime;
     _selectedHour = _hours[0];
     _selectedMinute = _minutes[1];
+    _getVoiceReserveMode();
+    if (_carnum != "" && _phonenum != "") _setTextController();
+    if (_isVoiceReserve == true) {
+      sleep(Duration(seconds: 2));
+      initVoiceReserve();
+    }
+  }
+
+  _setTextController() {
+    _carnumController.text = _carnum;
+    _phonenumController.text = _phonenum;
   }
 
   _setEndDateTime(_sHour, _sMin) {
@@ -101,6 +148,20 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     });
   }
 
+  _setVoiceSpeakItem() async {
+    setState(() {
+      _speakItem = lastWords;
+    });
+  }
+
+  // 실시간 예약 방식 설정 (텍스트/음성)
+  _setVoiceReserveMode(bool tf) async {
+    setState(() {
+      _isVoiceReserve = tf;
+      _pref.setBool("isVoiceReserve", _isVoiceReserve);
+    });
+  }
+
   _getPreEdit() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
@@ -135,6 +196,14 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _pref = await SharedPreferences.getInstance();
     setState(() {
       _zoneName = _pref.getString("parkingZone") ?? "";
+    });
+  }
+
+  // 음성 인식 모드 확인
+  _getVoiceReserveMode() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _isVoiceReserve = _pref.getBool("isVoiceReserve") ?? false;
     });
   }
 
@@ -237,6 +306,137 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
       print(
           "#################### _editReserve() 데이터 전송 실패: ${e} ####################");
     }
+  }
+
+  // STT Setting
+  Future<void> initSpeechState() async {
+    _logEvent('Initialize');
+    try {
+      var hasSpeech = await speech.initialize(
+        onError: errorListener,
+        onStatus: statusListener,
+        debugLogging: _logEvents,
+      );
+      if (hasSpeech) {
+        // Get the list of languages installed on the supporting platform so they
+        // can be displayed in the UI for selection by the user.
+        _localeNames = await speech.locales();
+
+        var systemLocale = await speech.systemLocale();
+        _currentLocaleId = systemLocale?.localeId ?? '';
+      }
+      if (!mounted) return;
+
+      setState(() {
+        _hasSpeech = hasSpeech;
+      });
+    } catch (e) {
+      setState(() {
+        lastError = 'Speech recognition failed: ${e.toString()}';
+        _hasSpeech = false;
+      });
+    }
+    print("initSpeechState Finish");
+  }
+
+  // TTS Setting
+  initTtsState() async {
+    flutterTts.setLanguage(language);
+    flutterTts.setVoice(voice);
+    flutterTts.setEngine(engine);
+    flutterTts.setVolume(volume);
+    flutterTts.setPitch(pitch);
+    flutterTts.setSpeechRate(rate);
+  }
+
+  // 음성 인식 모드 예약 처리 함수
+  initVoiceReserve() {
+    print("initVoiceReserve 함수 탐");
+    _speak("${_parkingLot}을 예약합니다.");
+    sleep(Duration(seconds: 3));
+
+    // 차량번호 등록
+    if (_carnum == "") {
+      bool chk = false;
+      String voiceCarnum = '';
+      do {
+        _speak("차량번호를 말씀해주세요.");
+        sleep(Duration(seconds: 3));
+
+        // 음성 인식
+        !_hasSpeech || speech.isListening
+            ? print("${!_hasSpeech} || ${speech.isListening}")
+            : startListening();
+        sleep(Duration(seconds: 3));
+
+        // 차량번호 등록 절차
+        voiceCarnum = _speakItem;
+        if (voiceCarnum.length >= 7 && voiceCarnum.length <= 8) {
+          setState(() {
+            _carnum = voiceCarnum;
+          });
+          chk = true;
+        } else {
+          _speak("차량번호는 7자리 또는 8자리로 입력해야 합니다.");
+          sleep(Duration(seconds: 4));
+        }
+      } while (chk == false);
+    }
+
+    // 전화번호 등록
+    if (_phonenum == "") {
+      bool chk = false;
+      String voicePhoneNum = "";
+      do {
+        _speak("전화번호를 말씀해주세요.");
+        sleep(Duration(seconds: 3));
+
+        // 음성 인식
+        !_hasSpeech || speech.isListening
+            ? print("${!_hasSpeech} || ${speech.isListening}")
+            : startListening();
+        sleep(Duration(seconds: 3));
+
+        // 전화번호 등록 절차
+        voicePhoneNum = _speakItem.replaceAll(RegExp(r'[^0-9]'), '');
+        if (voicePhoneNum.length == 11) {
+          setState(() {
+            _phonenum = voicePhoneNum;
+          });
+          chk = true;
+        } else {
+          _speak("전화번호는 11자리 숫자로 입력해야 합니다.");
+          sleep(Duration(seconds: 5));
+        }
+      } while (chk == false);
+    }
+
+    // 예약 처리 또는 취소
+    do {
+      _speak("예약을 완료하려면 '확인', 취소하려면 '취소'라고 말씀해주세요.");
+      sleep(Duration(seconds: 8));
+
+      // 음성 인식
+      !_hasSpeech || speech.isListening
+          ? print("${!_hasSpeech} || ${speech.isListening}")
+          : startListening();
+      sleep(Duration(seconds: 3));
+
+      // 확인 or 취소
+      if (_speakItem == "확인") {
+        // 예약 정보 서버 전송
+
+        // 예약 완료 페이지로 이동
+        Navigator.pushNamed(context, '/finish-reserve');
+      }
+      if (_speakItem == "취소") {
+        // 음성 인식 모드 해제
+        _setVoiceReserveMode(false);
+
+        // 주차장 검색 페이지로 이동
+        Navigator.pushNamed(context, '/search');
+      }
+    } while (!(_speakItem == "확인" || _speakItem == "취소"));
   }
 
   @override
@@ -415,7 +615,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 style: TextStyle(),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: "000가0000",
+                                  hintText:
+                                      _carnum == "" ? "000가0000" : "${_carnum}",
                                 ),
                                 inputFormatters: [
                                   // 한글 및 숫자로 제한
@@ -457,7 +658,9 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                 style: TextStyle(),
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  hintText: "01000000000",
+                                  hintText: _phonenum == ""
+                                      ? "01000000000"
+                                      : "${_phonenum}",
                                 ),
                                 keyboardType: TextInputType.number, // 숫자 키보드 사용
                                 inputFormatters: [
@@ -538,7 +741,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                   "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                               // 예약 서버 전송
-                              _setReserve();
+                              //_setReserve();
 
                               // 예약 완료 페이지로 이동
                               Navigator.pushNamed(context, '/finish-reserve');
@@ -604,5 +807,80 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
           }),
       bottomNavigationBar: MenuBottom(1),
     );
+  }
+
+  // STT Setting
+  void startListening() {
+    print("startListening");
+    _logEvent('start listening');
+    lastWords = '';
+    lastError = '';
+    final pauseFor = int.tryParse(_pauseForController.text);
+    final listenFor = int.tryParse(_listenForController.text);
+    final options = SpeechListenOptions(
+        onDevice: _onDevice,
+        listenMode: ListenMode.confirmation,
+        cancelOnError: true,
+        partialResults: true,
+        autoPunctuation: true,
+        enableHapticFeedback: true);
+    speech.listen(
+      onResult: resultListener,
+      listenFor: Duration(seconds: listenFor ?? 30),
+      pauseFor: Duration(seconds: pauseFor ?? 3),
+      localeId: _currentLocaleId,
+      onSoundLevelChange: soundLevelListener,
+      listenOptions: options,
+    );
+    setState(() {});
+  }
+
+  Future<void> resultListener(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+    }
+
+    await _setVoiceSpeakItem();
+  }
+
+  void soundLevelListener(double level) {
+    minSoundLevel = min(minSoundLevel, level);
+    maxSoundLevel = max(maxSoundLevel, level);
+    _logEvent('sound level $level: $minSoundLevel - $maxSoundLevel ');
+    setState(() {
+      this.level = level;
+    });
+  }
+
+  void errorListener(SpeechRecognitionError error) {
+    _logEvent(
+        'Received error status: $error, listening: ${speech.isListening}');
+    setState(() {
+      lastError = '${error.errorMsg} - ${error.permanent}';
+    });
+  }
+
+  void statusListener(String status) {
+    _logEvent(
+        'Received listener status: $status, listening: ${speech.isListening}');
+    setState(() {
+      lastStatus = status;
+    });
+  }
+
+  void _logEvent(String eventDescription) {
+    if (_logEvents) {
+      var eventTime = DateTime.now().toIso8601String();
+      debugPrint('$eventTime $eventDescription');
+    }
+  }
+
+  // TTS Setting
+  Future _speak(voiceText) async {
+    flutterTts.speak(voiceText);
   }
 }

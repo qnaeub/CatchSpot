@@ -27,7 +27,6 @@ class _ManageScreenState extends State<ManageScreen> {
   String _processState = "";
   String _reserveKey = "rxvsu1djt4beptv";
   DateTime _endDateTime = DateTime.now();
-  //String _endDateTime = "";
   DateTime _datetime = DateTime.now();
   bool isEdit = false;
 
@@ -35,6 +34,9 @@ class _ManageScreenState extends State<ManageScreen> {
       TextEditingController(text: "$_carnum");
   late TextEditingController _phonenumController =
       TextEditingController(text: "$_phonenum");
+
+  // 주차 정보 사전 등록
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
   @override
   void initState() {
@@ -90,26 +92,26 @@ class _ManageScreenState extends State<ManageScreen> {
     }
   }
 
-  Future<void> _editReserve() async {
+  Future<void> _editNumbers() async {
     Map<String, dynamic>? data = {
       'reservation_key': _reserveKey,
       'new_vehicle_num': _carnum,
       'new_phone_number': _phonenum,
     };
-    print("#################### _editReserve() data: ${data}");
+    print("#################### _editNumbers() data: ${data}");
 
     try {
       var response = await put('/reservation/update', data);
       Map<String, dynamic> jsonResponse = response.data;
 
       if (response.statusCode == 200) {
-        print('#################### _editReserve() 데이터 전송 성공');
+        print('#################### _editNumbers() 데이터 전송 성공');
         print("결과: ${jsonResponse['결과']}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print("#################### _editReserve() 데이터 전송 실패: ${e}");
+      print("#################### _editNumbers() 데이터 전송 실패: ${e}");
     }
   }
 
@@ -239,7 +241,7 @@ class _ManageScreenState extends State<ManageScreen> {
           ],
         ),
       );
-    } else if (_carnum != "" && _phonenum != "") {
+    } else if (_processState == "예약완료" || _processState == "주차완료") {
       childWidget = Column(
         children: <Widget>[
           Expanded(
@@ -594,8 +596,8 @@ class _ManageScreenState extends State<ManageScreen> {
                 child: InkWell(
                   onTap: () {
                     // 수정해야됨...
-                    //_cancelReserve();
-                    _cancelReserveDB(_reserveKey);
+                    _cancelReserve();
+                    //_cancelReserveDB(_reserveKey);
                     Navigator.pushNamed(context, '/manage');
                   },
                   child: Container(
@@ -674,7 +676,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       );
                     } else {
                       // 예약 수정 서버 전달
-                      _editReserve();
+                      _editNumbers();
 
                       // isEdit false로 변경
                       setState(() {
@@ -714,6 +716,7 @@ class _ManageScreenState extends State<ManageScreen> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50),
         child: AppBar(
@@ -724,7 +727,162 @@ class _ManageScreenState extends State<ManageScreen> {
           centerTitle: true,
           backgroundColor: Color(0xffFFFFFF),
           elevation: 1,
-          automaticallyImplyLeading: false,
+          //automaticallyImplyLeading: false,
+          actions: <Widget>[
+            IconButton(
+                onPressed: () {
+                  _scaffoldKey.currentState?.openDrawer();
+                },
+                icon: Icon(Icons.menu, color: Color(0xff6528F7)))
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            ListTile(),
+            ListTile(
+              leading: Icon(Icons.assignment_add),
+              iconColor: Color(0xff6528F7),
+              focusColor: Color(0xff6528F7),
+              title: Text("주차 정보 사전 등록"),
+              onTap: () {
+                _carnumController.text = "";
+                _phonenumController.text = "";
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(
+                          "주차 정보 사전 등록",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Color(0xff6528F7)),
+                        ),
+                        content: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              if (_carnum == "" && _phonenum == "") ...{
+                                TextField(
+                                  controller: _carnumController,
+                                  decoration: InputDecoration(
+                                      hintText: "차량번호 입력: (ex. 123가1234)"),
+                                  inputFormatters: [
+                                    // 한글 및 숫자로 제한
+                                    LengthLimitingTextInputFormatter(
+                                        8), // 8자리로 제한
+                                  ],
+                                ),
+                                TextField(
+                                  controller: _phonenumController,
+                                  decoration: InputDecoration(
+                                      hintText: "전화번호 입력: (ex. 01012345678)"),
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter
+                                        .digitsOnly, // 숫자만 입력
+                                    LengthLimitingTextInputFormatter(
+                                        11), // 11자리로 제한
+                                  ],
+                                ),
+                              } else ...{
+                                TextField(
+                                  controller: _carnumController,
+                                  decoration: InputDecoration(
+                                      hintText: "등록된 차량번호: ${_carnum}"),
+                                  inputFormatters: [
+                                    // 한글 및 숫자로 제한
+                                    LengthLimitingTextInputFormatter(
+                                        8), // 8자리로 제한
+                                  ],
+                                ),
+                                TextField(
+                                  controller: _phonenumController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                      hintText: "등록된 전화번호: ${_phonenum}"),
+                                )
+                              }
+                            ],
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                _carnumController.text = "";
+                                _phonenumController.text = "";
+                              },
+                              child: Text(
+                                "취소",
+                                style: TextStyle(color: Color(0xff6528F7)),
+                              )),
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_carnumController.text == "" ||
+                                  _phonenumController.text == "") {
+                                // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content:
+                                          Text("차량번호와 전화번호를 반드시 입력해야 합니다."),
+                                    );
+                                  },
+                                );
+                              } else if (_carnumController.text.length < 7) {
+                                // 차량번호 7자리 미만 시 안내 팝업창 띄움
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content:
+                                          Text("차량번호는 7자리 또는 8자리로 입력해야 합니다."),
+                                    );
+                                  },
+                                );
+                              } else if (_phonenumController.text.length < 11) {
+                                // 전화번호 11자리 미만 시 안내 팝업창 띄움
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: Text("전화번호는 11자리로 입력해야 합니다."),
+                                    );
+                                  },
+                                );
+                              } else {
+                                _setCarAndPhonenum();
+                                _carnumController.text = "";
+                                _phonenumController.text = "";
+                                Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      content: Text("차량번호와 전화번호를 등록했습니다."),
+                                    );
+                                  },
+                                );
+                                print("차량번호: ${_carnum}");
+                                print("전화번호: ${_phonenum}");
+                              }
+                            },
+                            child: Text("등록"),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xff6528F7)),
+                          ),
+                        ],
+                      );
+                    });
+              },
+              trailing: Icon(Icons.navigate_next),
+            )
+          ],
         ),
       ),
       body: childWidget,
