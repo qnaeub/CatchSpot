@@ -60,6 +60,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<LocaleName> _localeNames = [];
   final SpeechToText speech = SpeechToText();
   String _speakItem = "";
+  int voiceNum = 0;
   bool _isVoiceReserve = false;
 
   // TTS Setting
@@ -104,8 +105,8 @@ class _SearchScreenState extends State<SearchScreen> {
   _setVoiceSpeakItem() async {
     setState(() {
       _speakItem = lastWords;
-      //_pref.setString("searchItem", _searchItem);
     });
+    print("음성 인식 단어: ${_speakItem}");
   }
 
   // 실시간 예약 방식 설정 (텍스트/음성)
@@ -135,6 +136,9 @@ class _SearchScreenState extends State<SearchScreen> {
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("lotKey", _lotKey);
     });
+
+    print("Set parking lot: ${_parkingLot}");
+    print("Set lot key: ${_lotKey}");
   }
 
   _getParkingLot() async {
@@ -447,97 +451,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       // 음성 인식
                       !_hasSpeech || speech.isListening
                           ? print("${!_hasSpeech} || ${speech.isListening}")
-                          : startListening();
+                          : startListening(voiceParkingLotSearch);
                       sleep(Duration(seconds: 3));
-
-                      if (_speakItem.length < 2) {
-                        // 2글자 미만 검색 시 팝업창 띄움
-                        showDialog(
-                          context: context,
-                          barrierDismissible: true,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              content: Text("2글자 이상의 단어를 검색해주세요."),
-                            );
-                          },
-                        );
-                        _speak("두 글자 이상의 단어를 검색해 주세요.");
-                      } else {
-                        // 주차장 불러오기
-                        _searchItem = _speakItem;
-                        await _getParkingLotList();
-
-                        if (lotNames.isEmpty) {
-                          // 검색된 결과 없음
-                          showDialog(
-                            context: context,
-                            barrierDismissible: true,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                content:
-                                    Text("'${_speakItem}'(으)로 검색한 결과가 없습니다."),
-                              );
-                            },
-                          );
-                          _speak("${_speakItem}으로 검색한 결과가 없습니다.");
-                        } else {
-                          // 주차장 이름 및 고유번호 출력
-                          print("주차장 이름: $lotNames");
-                          print("주차장 key: $lotKeys");
-
-                          // 주차장 목록 띄우기
-                          showSearchResult = true;
-
-                          int voiceNum = 0;
-                          do {
-                            // 주차장 목록 안내하기
-                            _speak("검색된 주차장 목록입니다. 예약할 주차장 번호를 선택해 주세요.");
-                            sleep(Duration(seconds: 5));
-                            int i = 0;
-                            while (i < lotNames.length) {
-                              _speak("${i + 1}번, ${lotNames[i]}.");
-                              sleep(Duration(seconds: 3));
-                              i++;
-                            }
-                            _speak("예약할 주차장 번호를 선택해 주세요.");
-                            sleep(Duration(seconds: 3));
-
-                            // 음성 인식
-                            !_hasSpeech || speech.isListening
-                                ? print(
-                                    "${!_hasSpeech} || ${speech.isListening}")
-                                : startListening();
-                            sleep(Duration(seconds: 3));
-
-                            print("선택한 번호: ${_speakItem}");
-
-                            // voiceNum = 음성 중 숫자만 출력
-                            _speakItem =
-                                _speakItem.replaceAll(RegExp(r'[^0-9]'), '');
-                            print("선택한 번호(정제): ${_speakItem}");
-                            if (_speakItem != "") {
-                              voiceNum = int.parse(_speakItem);
-                              print("voiceNum: ${voiceNum}");
-                              if (voiceNum < 1 || voiceNum > lotNames.length) {
-                                _speak("선택한 주차장 번호가 없습니다.");
-                                sleep(Duration(seconds: 2));
-                              }
-                            } else {
-                              _speak("선택한 주차장 번호가 없습니다.");
-                              sleep(Duration(seconds: 3));
-                            }
-                          } while (voiceNum < 1 || voiceNum > lotNames.length);
-
-                          // 선택한 주차장 로컬에 저장
-                          _parkingLot = lotNames[voiceNum];
-                          _lotKey = lotKeys[voiceNum];
-                          _setParkingLot();
-                          print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
-
-                          // 주차장의 정보 출력 및 예약 정보 입력 페이지로 이동
-                          _getParkingLotInfo(_lotKey);
-                        }
-                      }
                     },
                     iconSize: 25.0,
                   ),
@@ -651,7 +566,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // STT Setting
-  void startListening() {
+  void startListening(result) {
     print("startListening");
     _logEvent('start listening');
     lastWords = '';
@@ -666,7 +581,7 @@ class _SearchScreenState extends State<SearchScreen> {
         autoPunctuation: true,
         enableHapticFeedback: true);
     speech.listen(
-      onResult: resultListener,
+      onResult: result,
       listenFor: Duration(seconds: listenFor ?? 30),
       pauseFor: Duration(seconds: pauseFor ?? 3),
       localeId: _currentLocaleId,
@@ -683,9 +598,120 @@ class _SearchScreenState extends State<SearchScreen> {
       setState(() {
         lastWords = '${result.recognizedWords}';
       });
+      _setVoiceSpeakItem();
     }
+  }
 
-    await _setVoiceSpeakItem();
+  Future<void> voiceParkingLotSearch(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+
+      if (_speakItem.length < 2) {
+        // 2글자 미만 검색 시 팝업창 띄움
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: Text("2글자 이상의 단어를 검색해주세요."),
+            );
+          },
+        );
+        _speak("두 글자 이상의 단어를 검색해 주세요.");
+      } else {
+        // 주차장 불러오기
+        _searchItem = _speakItem;
+        await _getParkingLotList();
+
+        if (lotNames.isEmpty) {
+          // 검색된 결과 없음
+          showDialog(
+            context: context,
+            barrierDismissible: true,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: Text("'${_speakItem}'(으)로 검색한 결과가 없습니다."),
+              );
+            },
+          );
+          _speak("${_speakItem}으로 검색한 결과가 없습니다.");
+        } else {
+          showSearchResult = true;
+          await voiceSelectParkingLot();
+        }
+      }
+    }
+  }
+
+  voiceSelectParkingLot() {
+    // 주차장 이름 및 고유번호 출력
+    print("주차장 이름: $lotNames");
+    print("주차장 key: $lotKeys");
+
+    // 주차장 목록 띄우기
+    //showSearchResult = true;
+
+    // 주차장 목록 안내하기
+    _speak("검색된 주차장 목록입니다. 예약할 주차장 번호를 선택해 주세요.");
+    sleep(Duration(seconds: 5));
+    int i = 0;
+    while (i < lotNames.length) {
+      _speak("${i + 1}번, ${lotNames[i]}.");
+      sleep(Duration(seconds: 3));
+      i++;
+    }
+    _speak("예약할 주차장 번호를 선택해 주세요.");
+    sleep(Duration(seconds: 3));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(voiceSelectNumber);
+    sleep(Duration(seconds: 3));
+  }
+
+  Future<void> voiceSelectNumber(SpeechRecognitionResult result) async {
+    print("This Progress: voiceSelectNumber");
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+
+      _speakItem = _speakItem.replaceAll(RegExp(r'[^0-9]'), '');
+      print("선택한 번호(정제): ${_speakItem}");
+      if (_speakItem != "") {
+        voiceNum = int.parse(_speakItem);
+        print("voiceNum: ${voiceNum}");
+        if (voiceNum < 1 || voiceNum > lotNames.length) {
+          _speak("선택한 주차장 번호가 없습니다.");
+          sleep(Duration(seconds: 2));
+
+          voiceSelectParkingLot();
+        } else {
+          // 선택한 주차장 로컬에 저장
+          _parkingLot = lotNames[voiceNum - 1];
+          _lotKey = lotKeys[voiceNum - 1];
+          _setParkingLot();
+          print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
+
+          // 주차장의 정보 출력 및 예약 정보 입력 페이지로 이동
+          _getParkingLotInfo(_lotKey);
+        }
+      } else {
+        _speak("선택한 주차장 번호가 없습니다.");
+        sleep(Duration(seconds: 3));
+
+        voiceSelectParkingLot();
+      }
+    }
   }
 
   void soundLevelListener(double level) {

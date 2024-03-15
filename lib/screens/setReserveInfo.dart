@@ -83,6 +83,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   @override
   void initState() {
     super.initState();
+    _getVoiceReserveMode();
     _getCarAndPhonenum();
     _getParkingLot();
     _getParkingZone();
@@ -91,12 +92,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     isRealTime = widget.realTime;
     _selectedHour = _hours[0];
     _selectedMinute = _minutes[1];
-    _getVoiceReserveMode();
     if (_carnum != "" && _phonenum != "") _setTextController();
-    if (_isVoiceReserve == true) {
-      sleep(Duration(seconds: 2));
-      initVoiceReserve();
-    }
+    _getVoiceReserveMode();
   }
 
   _setTextController() {
@@ -205,6 +202,9 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _isVoiceReserve = _pref.getBool("isVoiceReserve") ?? false;
     });
+    print("음성 인식 모드 확인: ${_isVoiceReserve}");
+
+    if (_isVoiceReserve == true) await initVoiceReserve();
   }
 
   Future<void> _setReserve() async {
@@ -352,6 +352,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   // 음성 인식 모드 예약 처리 함수
   initVoiceReserve() {
     print("initVoiceReserve 함수 탐");
+    print("${_parkingLot}을 예약합니다.");
     _speak("${_parkingLot}을 예약합니다.");
     sleep(Duration(seconds: 3));
 
