@@ -24,6 +24,7 @@ class ParkingLotARealState extends State<ParkingLotAReal> {
     setState(() {
       _realLot = _pref.getStringList("realLot") ?? [];
     });
+    print("확인용~~~~ 실시간 예약 구역: ${_realLot}");
   }
 
   @override

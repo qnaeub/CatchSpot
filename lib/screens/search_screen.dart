@@ -171,6 +171,12 @@ class _SearchScreenState extends State<SearchScreen> {
     } catch (e) {
       print("#################### 에러: ${e}");
     }
+
+    // 주차 구역 페이지로 이동
+    if (_isVoiceReserve == true)
+      Navigator.pushNamed(context, '/setinfo');
+    else
+      Navigator.pushNamed(context, '/parking-space');
   }
 
   Future<void> _getParkingLotList() async {
@@ -528,11 +534,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           _setParkingLot();
                           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
 
-                          // 주차장의 정보 출력
+                          // 주차장의 정보 출력 및 예약 정보 입력 페이지로 이동
                           _getParkingLotInfo(_lotKey);
-
-                          // 주차 구역 페이지로 이동
-                          Navigator.pushNamed(context, '/setinfo');
                         }
                       }
                     },
@@ -616,11 +619,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           _setParkingLot();
                           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
 
-                          // 주차장의 정보 출력
+                          // 주차장의 정보 출력 및 주차 구역 페이지로 이동
                           _getParkingLotInfo(_lotKey);
-
-                          // 주차 구역 페이지로 이동
-                          Navigator.pushNamed(context, '/parking-space');
                         },
                         child: ListTile(
                           title: Text(lotNames[index]),
