@@ -17,6 +17,8 @@ class FinishReserve extends StatefulWidget {
 class _FinishReserveState extends State<FinishReserve> {
   late SharedPreferences _pref;
   bool _isVoiceReserve = false;
+
+  // TTS Setting
   FlutterTts flutterTts = FlutterTts();
   String language = "ko-KR";
   Map<String, String> voice = {"name": "ko-kr-x-ism-local", "locale": "ko-KR"};
@@ -27,17 +29,11 @@ class _FinishReserveState extends State<FinishReserve> {
 
   @override
   void initState() {
+    print("finishReserve 페이지");
     super.initState();
     initTtsState();
     _getSearchItem();
-    if (_isVoiceReserve == true) _voiceReserveMode();
-    Timer(
-      Duration(seconds: 3),
-      () => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ManageScreen()),
-      ),
-    );
+    _getVoiceReserveMode();
   }
 
   // 실시간 예약 방식 설정 (텍스트/음성)
@@ -48,6 +44,29 @@ class _FinishReserveState extends State<FinishReserve> {
     });
   }
 
+  // 음성 인식 모드 확인
+  _getVoiceReserveMode() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _isVoiceReserve = _pref.getBool("isVoiceReserve") ?? false;
+    });
+    print("음성 인식 모드 확인: ${_isVoiceReserve}");
+
+    if (_isVoiceReserve == true)
+      Timer(
+        Duration(seconds: 1),
+        () => _voiceReserveMode(),
+      );
+    else
+      Timer(
+        Duration(seconds: 3),
+        () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ManageScreen()),
+        ),
+      );
+  }
+
   _getSearchItem() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
@@ -55,6 +74,7 @@ class _FinishReserveState extends State<FinishReserve> {
     });
   }
 
+  // TTS Setting
   initTtsState() async {
     flutterTts.setLanguage(language);
     flutterTts.setVoice(voice);
@@ -65,10 +85,14 @@ class _FinishReserveState extends State<FinishReserve> {
   }
 
   _voiceReserveMode() {
+    print("_voiceReserveMode");
     _speak("예약이 완료되었습니다. 10분 내로 입차해 주시길 바랍니다.");
     sleep(Duration(seconds: 6));
     _setVoiceReserveMode(false);
-    Navigator.pushNamed(context, '/search');
+    Timer(
+      Duration(seconds: 6),
+      () => Navigator.pushNamed(context, '/manage'),
+    );
   }
 
   @override
@@ -92,6 +116,7 @@ class _FinishReserveState extends State<FinishReserve> {
     );
   }
 
+  // TTS Setting
   Future _speak(voiceText) async {
     flutterTts.speak(voiceText);
   }

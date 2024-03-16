@@ -95,6 +95,14 @@ class _SearchScreenState extends State<SearchScreen> {
     _getCarAndPhonenum();
   }
 
+  _setInit() async {
+    setState(() {
+      _carnum = "";
+      _phonenum = "";
+      _processState = "";
+    });
+  }
+
   _setSearchItem() async {
     setState(() {
       _searchItem = textController.text;
@@ -124,6 +132,12 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  _setSearchResult() {
+    setState(() {
+      showSearchResult = true;
+    });
+  }
+
   _getSearchItem() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
@@ -136,9 +150,6 @@ class _SearchScreenState extends State<SearchScreen> {
       _pref.setString("parkingLot", _parkingLot);
       _pref.setString("lotKey", _lotKey);
     });
-
-    print("Set parking lot: ${_parkingLot}");
-    print("Set lot key: ${_lotKey}");
   }
 
   _getParkingLot() async {
@@ -511,7 +522,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           print("주차장 key: $lotKeys");
 
                           // 주차장 목록 띄우기
-                          showSearchResult = true;
+                          //showSearchResult = true;
+                          _setSearchResult();
                         }
                       }
                     },
@@ -567,7 +579,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   // STT Setting
   void startListening(result) {
-    print("startListening");
     _logEvent('start listening');
     lastWords = '';
     lastError = '';
@@ -641,21 +652,25 @@ class _SearchScreenState extends State<SearchScreen> {
           );
           _speak("${_speakItem}으로 검색한 결과가 없습니다.");
         } else {
-          showSearchResult = true;
-          await voiceSelectParkingLot();
+          // 주차장 이름 및 고유번호 출력
+          print("주차장 이름: $lotNames");
+          print("주차장 key: $lotKeys");
+
+          // 주차장 목록 띄우기
+          _setSearchResult();
+
+          Timer(
+            Duration(seconds: 1),
+            () => voiceSelectParkingLot(),
+          );
+
+          //await voiceSelectParkingLot();
         }
       }
     }
   }
 
-  voiceSelectParkingLot() {
-    // 주차장 이름 및 고유번호 출력
-    print("주차장 이름: $lotNames");
-    print("주차장 key: $lotKeys");
-
-    // 주차장 목록 띄우기
-    //showSearchResult = true;
-
+  Future<void> voiceSelectParkingLot() async {
     // 주차장 목록 안내하기
     _speak("검색된 주차장 목록입니다. 예약할 주차장 번호를 선택해 주세요.");
     sleep(Duration(seconds: 5));
@@ -676,7 +691,6 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Future<void> voiceSelectNumber(SpeechRecognitionResult result) async {
-    print("This Progress: voiceSelectNumber");
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     if (result.finalResult == true) {
@@ -694,7 +708,7 @@ class _SearchScreenState extends State<SearchScreen> {
           _speak("선택한 주차장 번호가 없습니다.");
           sleep(Duration(seconds: 2));
 
-          voiceSelectParkingLot();
+          await voiceSelectParkingLot();
         } else {
           // 선택한 주차장 로컬에 저장
           _parkingLot = lotNames[voiceNum - 1];
@@ -709,7 +723,7 @@ class _SearchScreenState extends State<SearchScreen> {
         _speak("선택한 주차장 번호가 없습니다.");
         sleep(Duration(seconds: 3));
 
-        voiceSelectParkingLot();
+        await voiceSelectParkingLot();
       }
     }
   }

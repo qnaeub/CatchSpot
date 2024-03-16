@@ -83,17 +83,22 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   @override
   void initState() {
     super.initState();
-    _getVoiceReserveMode();
+    //_getVoiceReserveMode();
     _getCarAndPhonenum();
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
     _getPreEdit();
+    initSpeechState();
+    initTtsState();
     isRealTime = widget.realTime;
     _selectedHour = _hours[0];
     _selectedMinute = _minutes[1];
     if (_carnum != "" && _phonenum != "") _setTextController();
-    _getVoiceReserveMode();
+    Timer(
+      Duration(seconds: 1),
+      () => _getVoiceReserveMode(),
+    );
   }
 
   _setTextController() {
@@ -149,6 +154,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {
       _speakItem = lastWords;
     });
+    print("음성 인식 단어: ${_speakItem}");
   }
 
   // 실시간 예약 방식 설정 (텍스트/음성)
@@ -351,8 +357,6 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
 
   // 음성 인식 모드 예약 처리 함수
   initVoiceReserve() {
-    print("initVoiceReserve 함수 탐");
-    print("${_parkingLot}을 예약합니다.");
     _speak("${_parkingLot}을 예약합니다.");
     sleep(Duration(seconds: 3));
 
@@ -367,7 +371,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         // 음성 인식
         !_hasSpeech || speech.isListening
             ? print("${!_hasSpeech} || ${speech.isListening}")
-            : startListening();
+            : startListening(setVoiceCarNum);
         sleep(Duration(seconds: 3));
 
         // 차량번호 등록 절차
@@ -395,7 +399,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         // 음성 인식
         !_hasSpeech || speech.isListening
             ? print("${!_hasSpeech} || ${speech.isListening}")
-            : startListening();
+            : startListening(setVoicePhoneNum);
         sleep(Duration(seconds: 3));
 
         // 전화번호 등록 절차
@@ -413,31 +417,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     }
 
     // 예약 처리 또는 취소
-    do {
-      _speak("예약을 완료하려면 '확인', 취소하려면 '취소'라고 말씀해주세요.");
-      sleep(Duration(seconds: 8));
-
-      // 음성 인식
-      !_hasSpeech || speech.isListening
-          ? print("${!_hasSpeech} || ${speech.isListening}")
-          : startListening();
-      sleep(Duration(seconds: 3));
-
-      // 확인 or 취소
-      if (_speakItem == "확인") {
-        // 예약 정보 서버 전송
-
-        // 예약 완료 페이지로 이동
-        Navigator.pushNamed(context, '/finish-reserve');
-      }
-      if (_speakItem == "취소") {
-        // 음성 인식 모드 해제
-        _setVoiceReserveMode(false);
-
-        // 주차장 검색 페이지로 이동
-        Navigator.pushNamed(context, '/search');
-      }
-    } while (!(_speakItem == "확인" || _speakItem == "취소"));
+    checkResultFunction();
   }
 
   @override
@@ -811,7 +791,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   }
 
   // STT Setting
-  void startListening() {
+  void startListening(result) {
     print("startListening");
     _logEvent('start listening');
     lastWords = '';
@@ -826,7 +806,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         autoPunctuation: true,
         enableHapticFeedback: true);
     speech.listen(
-      onResult: resultListener,
+      onResult: result,
       listenFor: Duration(seconds: listenFor ?? 30),
       pauseFor: Duration(seconds: pauseFor ?? 3),
       localeId: _currentLocaleId,
@@ -836,16 +816,76 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     setState(() {});
   }
 
-  Future<void> resultListener(SpeechRecognitionResult result) async {
+  Future<void> checkResultFunction() async {
+    // 예약 처리 또는 취소
+    _speak("예약을 완료하려면 '확인', 취소하려면 '취소'라고 말씀해주세요.");
+    sleep(Duration(seconds: 6));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(checkResult);
+    sleep(Duration(seconds: 3));
+  }
+
+  Future<void> checkResult(SpeechRecognitionResult result) async {
+    print(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     if (result.finalResult == true) {
       setState(() {
         lastWords = '${result.recognizedWords}';
       });
-    }
+      _setVoiceSpeakItem();
 
-    await _setVoiceSpeakItem();
+      if (_speakItem == "확인") {
+        // 예약 정보 저장
+        _setReserveDate();
+
+        // 예약현황 - 진행상태 설정
+        _processState = "예약완료";
+        _setProcessState();
+
+        // 예약 서버 전송
+        //_setReserve();
+
+        // 예약 완료 페이지로 이동
+        Navigator.pushNamed(context, '/finish-reserve');
+      } else if (_speakItem == "취소") {
+        _speak("예약이 취소되었습니다.");
+        sleep(Duration(seconds: 3));
+
+        // 음성 인식 모드 해제
+        _setVoiceReserveMode(false);
+
+        // 주차장 검색 페이지로 이동
+        Navigator.pushNamed(context, '/search');
+      } else
+        checkResultFunction();
+    }
+  }
+
+  Future<void> setVoiceCarNum(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+    }
+  }
+
+  Future<void> setVoicePhoneNum(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+    }
   }
 
   void soundLevelListener(double level) {
