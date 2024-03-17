@@ -95,14 +95,6 @@ class _SearchScreenState extends State<SearchScreen> {
     _getCarAndPhonenum();
   }
 
-  _setInit() async {
-    setState(() {
-      _carnum = "";
-      _phonenum = "";
-      _processState = "";
-    });
-  }
-
   _setSearchItem() async {
     setState(() {
       _searchItem = textController.text;

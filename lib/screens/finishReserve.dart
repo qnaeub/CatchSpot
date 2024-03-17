@@ -89,10 +89,7 @@ class _FinishReserveState extends State<FinishReserve> {
     _speak("예약이 완료되었습니다. 10분 내로 입차해 주시길 바랍니다.");
     sleep(Duration(seconds: 6));
     _setVoiceReserveMode(false);
-    Timer(
-      Duration(seconds: 6),
-      () => Navigator.pushNamed(context, '/manage'),
-    );
+    Navigator.pushNamed(context, '/manage');
   }
 
   @override

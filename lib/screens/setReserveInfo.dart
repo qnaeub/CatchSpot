@@ -70,6 +70,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   final SpeechToText speech = SpeechToText();
   String _speakItem = "";
   bool _isVoiceReserve = false;
+  String chkCarNum = "";
+  String chkPhoneNum = "";
 
   // TTS Setting
   FlutterTts flutterTts = FlutterTts();
@@ -96,7 +98,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     _selectedMinute = _minutes[1];
     if (_carnum != "" && _phonenum != "") _setTextController();
     Timer(
-      Duration(seconds: 1),
+      Duration(seconds: 2),
       () => _getVoiceReserveMode(),
     );
   }
@@ -361,63 +363,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     sleep(Duration(seconds: 3));
 
     // 차량번호 등록
-    if (_carnum == "") {
-      bool chk = false;
-      String voiceCarnum = '';
-      do {
-        _speak("차량번호를 말씀해주세요.");
-        sleep(Duration(seconds: 3));
-
-        // 음성 인식
-        !_hasSpeech || speech.isListening
-            ? print("${!_hasSpeech} || ${speech.isListening}")
-            : startListening(setVoiceCarNum);
-        sleep(Duration(seconds: 3));
-
-        // 차량번호 등록 절차
-        voiceCarnum = _speakItem;
-        if (voiceCarnum.length >= 7 && voiceCarnum.length <= 8) {
-          setState(() {
-            _carnum = voiceCarnum;
-          });
-          chk = true;
-        } else {
-          _speak("차량번호는 7자리 또는 8자리로 입력해야 합니다.");
-          sleep(Duration(seconds: 4));
-        }
-      } while (chk == false);
-    }
-
-    // 전화번호 등록
-    if (_phonenum == "") {
-      bool chk = false;
-      String voicePhoneNum = "";
-      do {
-        _speak("전화번호를 말씀해주세요.");
-        sleep(Duration(seconds: 3));
-
-        // 음성 인식
-        !_hasSpeech || speech.isListening
-            ? print("${!_hasSpeech} || ${speech.isListening}")
-            : startListening(setVoicePhoneNum);
-        sleep(Duration(seconds: 3));
-
-        // 전화번호 등록 절차
-        voicePhoneNum = _speakItem.replaceAll(RegExp(r'[^0-9]'), '');
-        if (voicePhoneNum.length == 11) {
-          setState(() {
-            _phonenum = voicePhoneNum;
-          });
-          chk = true;
-        } else {
-          _speak("전화번호는 11자리 숫자로 입력해야 합니다.");
-          sleep(Duration(seconds: 5));
-        }
-      } while (chk == false);
-    }
-
-    // 예약 처리 또는 취소
-    checkResultFunction();
+    if (_carnum == "")
+      setVoiceCarNumFunction();
+    else
+      // 예약 처리 또는 취소
+      checkResultFunction();
   }
 
   @override
@@ -665,7 +615,8 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                       child: InkWell(
                           onTap: () {
                             // 차량번호, 전화번호 데이터 저장
-                            _setCarAndPhonenum();
+                            if (_carnum == "" || _phonenum == "")
+                              _setCarAndPhonenum();
 
                             if (_carnum == "" || _phonenum == "") {
                               // 차량번호 또는 전화번호 미입력 시 안내 팝업창 띄움
@@ -829,8 +780,6 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   }
 
   Future<void> checkResult(SpeechRecognitionResult result) async {
-    print(
-        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
     if (result.finalResult == true) {
@@ -841,6 +790,10 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
 
       if (_speakItem == "확인") {
         // 예약 정보 저장
+        setState(() {
+          _pref.setString("carnum", _carnum);
+          _pref.setString("phonenum", _phonenum);
+        });
         _setReserveDate();
 
         // 예약현황 - 진행상태 설정
@@ -866,6 +819,17 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     }
   }
 
+  Future<void> setVoiceCarNumFunction() async {
+    _speak("차량번호를 말씀해주세요.");
+    sleep(Duration(seconds: 3));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(setVoiceCarNum);
+    sleep(Duration(seconds: 5));
+  }
+
   Future<void> setVoiceCarNum(SpeechRecognitionResult result) async {
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
@@ -874,7 +838,59 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         lastWords = '${result.recognizedWords}';
       });
       _setVoiceSpeakItem();
+
+      // 음성 인식 정제
+      chkCarNum = _speakItem.replaceAll(RegExp('\\s'), '');
+      print("음성 인식 단어(정제): ${chkCarNum}");
+
+      // 차량번호 등록
+      if (chkCarNum.length >= 7 && chkCarNum.length <= 8) {
+        // 차량번호 확인
+        checkVoiceInput('차량번호', chkCarNum, 9, checkCarNum);
+      } else {
+        _speak("차량번호는 7자리 또는 8자리로 입력해야 합니다.");
+        sleep(Duration(seconds: 4));
+
+        setVoiceCarNumFunction();
+      }
     }
+  }
+
+  Future<void> checkCarNum(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+
+      if (_speakItem == "확인") {
+        _speak("차량번호를 등록했습니다.");
+        sleep(Duration(seconds: 3));
+
+        setState(() {
+          _carnum = chkCarNum;
+        });
+
+        setVoicePhoneNumFunction();
+      } else if (_speakItem == "다시")
+        setVoiceCarNumFunction();
+      else {
+        checkVoiceInput('차량번호', chkCarNum, 9, checkCarNum);
+      }
+    }
+  }
+
+  Future<void> setVoicePhoneNumFunction() async {
+    _speak("전화번호를 말씀해주세요.");
+    sleep(Duration(seconds: 3));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(setVoicePhoneNum);
+    sleep(Duration(seconds: 7));
   }
 
   Future<void> setVoicePhoneNum(SpeechRecognitionResult result) async {
@@ -883,9 +899,63 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     if (result.finalResult == true) {
       setState(() {
         lastWords = '${result.recognizedWords}';
+        _setVoiceSpeakItem();
+
+        // 음성 인식 정제
+        chkPhoneNum = _speakItem.replaceAll(RegExp(r'[^0-9]'), '');
+        print("음성 인식 단어(정제): ${chkPhoneNum}");
+
+        // 전화번호 등록
+        if (chkPhoneNum.length == 11) {
+          // 전화번호 확인
+          String speakPhoneNum = _speakItem;
+          checkVoiceInput('전화번호', speakPhoneNum, 10, checkPhoneNum);
+        } else {
+          _speak("전화번호는 11자리 숫자로 입력해야 합니다.");
+          sleep(Duration(seconds: 5));
+
+          setVoicePhoneNumFunction();
+        }
+      });
+    }
+  }
+
+  Future<void> checkPhoneNum(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
       });
       _setVoiceSpeakItem();
+
+      if (_speakItem == "확인") {
+        _speak("전화번호를 등록했습니다.");
+        sleep(Duration(seconds: 3));
+
+        setState(() {
+          _phonenum = chkPhoneNum;
+        });
+
+        checkResultFunction();
+      } else if (_speakItem == "다시")
+        setVoicePhoneNumFunction();
+      else {
+        checkVoiceInput('전화번호', chkPhoneNum, 10, checkPhoneNum);
+      }
     }
+  }
+
+  Future<void> checkVoiceInput(
+      String str, String value, int second, result) async {
+    _speak("${str}가 ${value} 맞습니까? 맞으면 '확인', 다시 입력하려면 '다시'라고 말씀해주세요.");
+    sleep(Duration(seconds: second));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(result);
+    sleep(Duration(seconds: 3));
   }
 
   void soundLevelListener(double level) {
