@@ -448,14 +448,12 @@ class _SearchScreenState extends State<SearchScreen> {
                       // 음성 검색 시 실행할 로직
                       _setVoiceReserveMode(true);
 
-                      _speak("주차장을 검색하세요.");
-                      sleep(Duration(seconds: 2));
-
-                      // 음성 인식
-                      !_hasSpeech || speech.isListening
-                          ? print("${!_hasSpeech} || ${speech.isListening}")
-                          : startListening(voiceParkingLotSearch);
-                      sleep(Duration(seconds: 3));
+                      if (_processState == "예약완료" ||
+                          _processState == "입차완료" ||
+                          _processState == "주차완료")
+                        voiceCheckCannotReserveFunction();
+                      else
+                        voiceSearchFunction();
                     },
                     iconSize: 25.0,
                   ),
@@ -605,6 +603,50 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
+  Future<void> voiceCheckCannotReserveFunction() async {
+    _speak(
+        "이미 예약된 정보가 있습니다. 주차장을 검색하여 실시간 정보를 확인하려면 '확인', 검색을 취소하려면 '취소'라고 말씀해주세요.");
+    sleep(Duration(seconds: 10));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(voiceCheckCannotReserve);
+    sleep(Duration(seconds: 3));
+  }
+
+  Future<void> voiceCheckCannotReserve(SpeechRecognitionResult result) async {
+    _logEvent(
+        'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
+    if (result.finalResult == true) {
+      setState(() {
+        lastWords = '${result.recognizedWords}';
+      });
+      _setVoiceSpeakItem();
+
+      if (_speakItem == "확인") {
+        voiceSearchFunction();
+      } else if (_speakItem == "취소") {
+        _speak("주차장 검색을 취소합니다.");
+        sleep(Duration(seconds: 3));
+
+        _setVoiceReserveMode(false);
+      } else
+        voiceCheckCannotReserveFunction();
+    }
+  }
+
+  Future<void> voiceSearchFunction() async {
+    _speak("주차장을 검색하세요.");
+    sleep(Duration(seconds: 2));
+
+    // 음성 인식
+    !_hasSpeech || speech.isListening
+        ? print("${!_hasSpeech} || ${speech.isListening}")
+        : startListening(voiceParkingLotSearch);
+    sleep(Duration(seconds: 3));
+  }
+
   Future<void> voiceParkingLotSearch(SpeechRecognitionResult result) async {
     _logEvent(
         'Result listener final: ${result.finalResult}, words: ${result.recognizedWords}');
@@ -655,16 +697,19 @@ class _SearchScreenState extends State<SearchScreen> {
             Duration(seconds: 1),
             () => voiceSelectParkingLot(),
           );
-
-          //await voiceSelectParkingLot();
         }
       }
     }
   }
 
   Future<void> voiceSelectParkingLot() async {
+    String txt = "예약";
+    if (_processState == "예약완료" ||
+        _processState == "입차완료" ||
+        _processState == "주차완료") txt = "확인";
+
     // 주차장 목록 안내하기
-    _speak("검색된 주차장 목록입니다. 예약할 주차장 번호를 선택해 주세요.");
+    _speak("검색된 주차장 목록입니다. ${txt}할 주차장 번호를 선택해 주세요.");
     sleep(Duration(seconds: 5));
     int i = 0;
     while (i < lotNames.length) {
@@ -672,7 +717,7 @@ class _SearchScreenState extends State<SearchScreen> {
       sleep(Duration(seconds: 3));
       i++;
     }
-    _speak("예약할 주차장 번호를 선택해 주세요.");
+    _speak("${txt}할 주차장 번호를 선택해 주세요.");
     sleep(Duration(seconds: 3));
 
     // 음성 인식
@@ -707,6 +752,10 @@ class _SearchScreenState extends State<SearchScreen> {
           _lotKey = lotKeys[voiceNum - 1];
           _setParkingLot();
           print("선택한 주차장: ${_parkingLot}\n주차장 키: ${_lotKey}");
+
+          if (_processState == "예약완료" ||
+              _processState == "입차완료" ||
+              _processState == "출차완료") _setVoiceReserveMode(false);
 
           // 주차장의 정보 출력 및 예약 정보 입력 페이지로 이동
           _getParkingLotInfo(_lotKey);

@@ -2,3 +2,4 @@
 /android/unityLibrary/build/il2cpp_armeabi-v7a_Release/il2cpp_cache/buildstate/artifacts/objcopy_hhch/libil2cpp.dbg.so filter=lfs diff=lfs merge=lfs -text
 /android/unityLibrary/build/il2cpp_arm64-v8a_Release/il2cpp_cache/buildstate/d8kz/libil2cpp.so filter=lfs diff=lfs merge=lfs -text
 /android/unityLibrary/build/il2cpp_armeabi-v7a_Release/il2cpp_cache/buildstate/iz17/libil2cpp.so filter=lfs diff=lfs merge=lfs -text
+/android/unityLibrary/symbols/arm64-v8a/libil2cpp.so filter=lfs diff=lfs merge=lfs -text
