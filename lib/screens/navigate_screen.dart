@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:flutter_unity_widget/flutter_unity_widget.dart';
@@ -17,11 +19,20 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   late SharedPreferences _pref;
   String _processState = "";
+  String _zoneName = "";
+  String selectedValue = '0';
 
   @override
   void initState() {
     super.initState();
     _getProcessState();
+    _setSelectedValue();
+  }
+
+  @override
+  void dispose() {
+    _unityWidgetController?.dispose();
+    super.dispose();
   }
 
   // 예약 현황 불러오기
@@ -30,6 +41,36 @@ class _NavigateScreenState extends State<NavigateScreen> {
     setState(() {
       _processState = _pref.getString("processState") ?? "";
     });
+  }
+
+  // 안내할 주차장 선택하기
+  _setSelectedValue() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _zoneName = _pref.getString("parkingZone") ?? "";
+      print("주차구역: ${_zoneName}");
+
+      if (_zoneName == "" ||
+          _zoneName == "Z001" ||
+          _zoneName == "Z004" ||
+          _zoneName == "Z007")
+        selectedValue = '0';
+      else if (_zoneName == "Z002" ||
+          _zoneName == "Z005" ||
+          _zoneName == "Z008")
+        selectedValue = '1';
+      else if (_zoneName == "Z003" || _zoneName == "Z006") selectedValue = '2';
+      print("선택 값: ${selectedValue}");
+    });
+
+    Timer(
+      Duration(seconds: 3),
+      () => SetCurrentNavigationTarget(selectedValue),
+    );
+    Timer(
+      Duration(seconds: 3),
+      () => SetDestinationParkingZone(_zoneName),
+    );
   }
 
   @override
@@ -63,6 +104,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
                       color: Colors.black,
                       child: UnityWidget(
                         onUnityCreated: onUnityCreated,
+                        onUnityMessage: onUnityMessage,
                         //fullscreen: true,
                       ),
                     ),
@@ -75,5 +117,19 @@ class _NavigateScreenState extends State<NavigateScreen> {
 
   void onUnityCreated(controller) {
     _unityWidgetController = controller;
+  }
+
+  void onUnityMessage(message) {
+    print('Received message from unity: ${message.toString()}');
+  }
+
+  void SetCurrentNavigationTarget(String selectedValue) {
+    _unityWidgetController?.postMessage(
+        'Indicator', 'SetCurrentNavigationTargetFlutter', selectedValue);
+  }
+
+  void SetDestinationParkingZone(String zone) {
+    _unityWidgetController?.postMessage(
+        'ParkingZoneText', 'SetDestinationParkingZone', zone);
   }
 }
