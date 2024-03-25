@@ -50,16 +50,24 @@ class _NavigateScreenState extends State<NavigateScreen> {
       _zoneName = _pref.getString("parkingZone") ?? "";
       print("주차구역: ${_zoneName}");
 
-      if (_zoneName == "" ||
-          _zoneName == "Z001" ||
-          _zoneName == "Z004" ||
-          _zoneName == "Z007")
+      if (_zoneName == "Z001")
         selectedValue = '0';
-      else if (_zoneName == "Z002" ||
-          _zoneName == "Z005" ||
-          _zoneName == "Z008")
+      else if (_zoneName == "Z002")
         selectedValue = '1';
-      else if (_zoneName == "Z003" || _zoneName == "Z006") selectedValue = '2';
+      else if (_zoneName == "Z003")
+        selectedValue = '2';
+      else if (_zoneName == "Z004")
+        selectedValue = '3';
+      else if (_zoneName == "Z005")
+        selectedValue = '4';
+      else if (_zoneName == "Z006")
+        selectedValue = '5';
+      else if (_zoneName == "Z007")
+        selectedValue = '6';
+      else if (_zoneName == "Z008")
+        selectedValue = '7';
+      else
+        selectedValue = '0';
       print("선택 값: ${selectedValue}");
     });
 
