@@ -84,10 +84,4 @@ public class SetNavigationTarget : MonoBehaviour
             getFlutterValue = true;
         }
     }
-
-    //public void ToggleVisibility()
-    //{
-    //    lineToggle = !lineToggle;
-    //    line.enabled = lineToggle;
-    //}
 }

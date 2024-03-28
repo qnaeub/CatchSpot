@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/shared/menu_bottom.dart';
 import 'package:flutter_unity_widget/flutter_unity_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_app/screens/search_screen.dart';
 
 class NavigateScreen extends StatefulWidget {
   const NavigateScreen({Key? key}) : super(key: key);
@@ -22,9 +25,19 @@ class _NavigateScreenState extends State<NavigateScreen> {
   String _zoneName = "";
   String selectedValue = '0';
 
+  // TTS Setting
+  FlutterTts flutterTts = FlutterTts();
+  String language = "ko-KR";
+  Map<String, String> voice = {"name": "ko-kr-x-ism-local", "locale": "ko-KR"};
+  String engine = "com.google.android.tts";
+  double volume = 0.8;
+  double pitch = 1.0;
+  double rate = 0.5;
+
   @override
   void initState() {
     super.initState();
+    initTtsState();
     _getProcessState();
     _setSelectedValue();
   }
@@ -81,6 +94,16 @@ class _NavigateScreenState extends State<NavigateScreen> {
     );
   }
 
+  // TTS Setting
+  initTtsState() async {
+    flutterTts.setLanguage(language);
+    flutterTts.setVoice(voice);
+    flutterTts.setEngine(engine);
+    flutterTts.setVolume(volume);
+    flutterTts.setPitch(pitch);
+    flutterTts.setSpeechRate(rate);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,7 +151,23 @@ class _NavigateScreenState extends State<NavigateScreen> {
   }
 
   void onUnityMessage(message) {
-    print('Received message from unity: ${message.toString()}');
+    message = message.toString();
+    print('[Flutter-Unity] Received message from unity: ${message}');
+
+    if (message == "Finish") {
+      Timer(
+        Duration(seconds: 1),
+        () => finishNavScene(),
+      );
+    }
+  }
+
+  finishNavScene() {
+    _speak("안내를 종료합니다.", 3);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SearchScreen()),
+    );
   }
 
   void SetCurrentNavigationTarget(String selectedValue) {
@@ -139,5 +178,11 @@ class _NavigateScreenState extends State<NavigateScreen> {
   void SetDestinationParkingZone(String zone) {
     _unityWidgetController?.postMessage(
         'ParkingZoneText', 'SetDestinationParkingZone', zone);
+  }
+
+  // TTS Setting
+  Future _speak(voiceText, int sec) async {
+    flutterTts.speak(voiceText);
+    sleep(Duration(seconds: sec));
   }
 }
