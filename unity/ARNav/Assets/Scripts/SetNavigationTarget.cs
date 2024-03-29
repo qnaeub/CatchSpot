@@ -35,7 +35,6 @@ public class SetNavigationTarget : MonoBehaviour
         line = transform.GetComponent<LineRenderer>();
         line.enabled = lineToggle;
         parkingAreaPrefab = Resources.Load("Prefabs/parkingAreaPrefab") as GameObject;
-        messageManager.SendMessageToFlutter("SetNavigationTarget ½ÇÇà");
     }
 
     private void Update()
@@ -83,5 +82,10 @@ public class SetNavigationTarget : MonoBehaviour
 
             getFlutterValue = true;
         }
+    }
+
+    public void DestroyTargetObject()
+    {
+        Destroy(parkingAreaPrefab);
     }
 }

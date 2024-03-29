@@ -24,6 +24,7 @@ public class ApplicationCanvasController : MonoBehaviour
         miniMapState = false;
         miniMapUsable = true;
         arrivalState = true;
+        messageManager.SendMessageToFlutter("Start");
     }
 
     void Update()

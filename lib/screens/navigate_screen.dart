@@ -154,19 +154,25 @@ class _NavigateScreenState extends State<NavigateScreen> {
     message = message.toString();
     print('[Flutter-Unity] Received message from unity: ${message}');
 
-    if (message == "Finish") {
+    if (message == "Start")
       Timer(
         Duration(seconds: 1),
-        () => finishNavScene(),
+        () => _speak("주차구역 안내를 시작합니다."),
       );
-    }
+    else if (message == "Arrive")
+      _speak("주차구역에 도착했습니다.");
+    else if (message == "Finish") finishNavScene();
   }
 
   finishNavScene() {
-    _speak("안내를 종료합니다.", 3);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SearchScreen()),
+    _speak("안내를 종료합니다.");
+    DestroyTargetObject();
+    Timer(
+      Duration(seconds: 1),
+      () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SearchScreen()),
+      ),
     );
   }
 
@@ -180,9 +186,12 @@ class _NavigateScreenState extends State<NavigateScreen> {
         'ParkingZoneText', 'SetDestinationParkingZone', zone);
   }
 
+  void DestroyTargetObject() {
+    _unityWidgetController?.postMessage('Indicator', 'DestroyTargetObject', '');
+  }
+
   // TTS Setting
-  Future _speak(voiceText, int sec) async {
+  Future _speak(voiceText) async {
     flutterTts.speak(voiceText);
-    sleep(Duration(seconds: sec));
   }
 }

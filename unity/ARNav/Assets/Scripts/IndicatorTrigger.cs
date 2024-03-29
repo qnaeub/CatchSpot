@@ -1,11 +1,20 @@
+using FlutterUnityIntegration;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class IndicatorTrigger : MonoBehaviour
 {
     public bool state;
     public GameObject ArrivalMessageBox;
+
+    public UnityMessageManager messageManager;
+
+    private void Awake()
+    {
+        messageManager = gameObject.AddComponent(typeof(UnityMessageManager)) as UnityMessageManager;
+    }
 
     void Start()
     {
@@ -25,6 +34,7 @@ public class IndicatorTrigger : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("[Unity] 주차구역에 도착했습니다.");
+        messageManager.SendMessageToFlutter("Arrive");
         state = true;
     }
 }
