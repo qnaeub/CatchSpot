@@ -10,7 +10,7 @@ public class ApplicationCanvasController : MonoBehaviour
     public bool arrivalState;
     public GameObject MiniMapFullScreen;
     public GameObject ArrivalMessageBox;
-    public Camera TopDownCamera;
+    //public Camera FullTopDownCamera;
 
     public UnityMessageManager messageManager;
 
@@ -43,13 +43,11 @@ public class ApplicationCanvasController : MonoBehaviour
                 if (miniMapState == true)
                 {
                     MiniMapFullScreen.SetActive(false);
-                    TopDownCamera.orthographicSize = 0.3f;
                     miniMapState = false;
                 }
                 else
                 {
                     MiniMapFullScreen.SetActive(true);
-                    TopDownCamera.orthographicSize = 0.6f;
                     miniMapState = true;
                 }
             }
