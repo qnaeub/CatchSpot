@@ -6,7 +6,8 @@ using UnityEngine.Networking;
 
 public class IndicatorTrigger : MonoBehaviour
 {
-    public bool state;
+    public bool miniMapState;
+    public bool arriveState;
     public GameObject ArrivalMessageBox;
 
     public UnityMessageManager messageManager;
@@ -18,23 +19,28 @@ public class IndicatorTrigger : MonoBehaviour
 
     void Start()
     {
-        state = false;
+        miniMapState = false;
+        arriveState = false;
     }
 
     void Update()
     {
-        if (state == true)
+        if (miniMapState == true)
          {
             ArrivalMessageBox.SetActive(true);
             GameObject.Find("ApplicationCanvas").GetComponent<ApplicationCanvasController>().SetMiniMapState();
-            state = false;
+            miniMapState = false;
          }
     }
 
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("[Unity] 주차구역에 도착했습니다.");
-        messageManager.SendMessageToFlutter("Arrive");
-        state = true;
+        if (arriveState == false)
+        {
+            messageManager.SendMessageToFlutter("Arrive");
+            arriveState = true;
+        }
+        miniMapState = true;
     }
 }

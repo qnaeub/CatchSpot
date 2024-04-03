@@ -7,6 +7,7 @@ import 'package:flutter_unity_widget/flutter_unity_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_app/screens/search_screen.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 class NavigateScreen extends StatefulWidget {
   const NavigateScreen({Key? key}) : super(key: key);
@@ -19,6 +20,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
   static final GlobalKey<ScaffoldState> _scaffoldKey =
       GlobalKey<ScaffoldState>();
   UnityWidgetController? _unityWidgetController;
+  UserAccelerometerEvent? _userAccelerometerEvent;
 
   late SharedPreferences _pref;
   String _processState = "";
@@ -40,6 +42,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
     initTtsState();
     _getProcessState();
     _setSelectedValue();
+    PrintAcceleration();
   }
 
   @override
@@ -159,9 +162,10 @@ class _NavigateScreenState extends State<NavigateScreen> {
         Duration(seconds: 1),
         () => _speak("주차구역 안내를 시작합니다."),
       );
-    else if (message == "Arrive")
+    else if (message == "Arrive") {
+      SetArrivalMessage(_zoneName);
       _speak("주차구역에 도착했습니다.");
-    else if (message == "Finish") finishNavScene();
+    } else if (message == "Finish") finishNavScene();
   }
 
   finishNavScene() {
@@ -186,6 +190,11 @@ class _NavigateScreenState extends State<NavigateScreen> {
         'ParkingZoneText', 'SetDestinationParkingZone', zone);
   }
 
+  void SetArrivalMessage(String zone) {
+    _unityWidgetController?.postMessage(
+        'ArrivalMessageText', 'SetArrivalMessage', zone);
+  }
+
   void DestroyTargetObject() {
     _unityWidgetController?.postMessage('Indicator', 'DestroyTargetObject', '');
   }
@@ -193,5 +202,12 @@ class _NavigateScreenState extends State<NavigateScreen> {
   // TTS Setting
   Future _speak(voiceText) async {
     flutterTts.speak(voiceText);
+  }
+
+  // Senser Plus
+  void PrintAcceleration() {
+    print("x: ${_userAccelerometerEvent?.x}");
+    print("y: ${_userAccelerometerEvent?.y}");
+    print("z: ${_userAccelerometerEvent?.z}");
   }
 }
