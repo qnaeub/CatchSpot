@@ -43,6 +43,9 @@ class _NavigateScreenState extends State<NavigateScreen> {
     _getProcessState();
     _setSelectedValue();
     PrintAcceleration();
+    //Timer.periodic(Duration(seconds: 1), (timer) {
+    //  PrintAcceleration();
+    //});
   }
 
   @override
@@ -139,7 +142,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
                       child: UnityWidget(
                         onUnityCreated: onUnityCreated,
                         onUnityMessage: onUnityMessage,
-                        //fullscreen: true,
+                        fullscreen: true,
                       ),
                     ),
                   ),

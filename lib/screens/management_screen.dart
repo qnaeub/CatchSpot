@@ -364,15 +364,15 @@ class _ManageScreenState extends State<ManageScreen> {
                         ),
                       ),
                       Positioned(
-                        top: 15,
+                        top: 10,
                         left: 50,
                         child: Container(
-                          width: 35,
+                          width: 45,
                           decoration: BoxDecoration(
                             color: Color(0xffFFFFFF),
                           ),
                           child: Text(
-                            "MY",
+                            " MY",
                             style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -395,7 +395,7 @@ class _ManageScreenState extends State<ManageScreen> {
                           children: <Widget>[
                             Container(
                               // 예약 시간
-                              height: 35,
+                              height: 40,
                               margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
                               child: Row(
                                 children: [
@@ -483,12 +483,12 @@ class _ManageScreenState extends State<ManageScreen> {
                         top: 11,
                         left: 50,
                         child: Container(
-                          width: 130,
+                          width: 140,
                           decoration: BoxDecoration(
                             color: Color(0xffFFFFFF),
                           ),
                           child: Text(
-                            "Parking Area",
+                            " Parking Area",
                             style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -727,17 +727,17 @@ class _ManageScreenState extends State<ManageScreen> {
           centerTitle: true,
           backgroundColor: Color(0xffFFFFFF),
           elevation: 1,
-          //automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false,
           actions: <Widget>[
             IconButton(
                 onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  _scaffoldKey.currentState?.openEndDrawer();
                 },
                 icon: Icon(Icons.menu, color: Color(0xff6528F7)))
           ],
         ),
       ),
-      drawer: Drawer(
+      endDrawer: Drawer(
         child: ListView(
           children: [
             ListTile(),
@@ -872,7 +872,10 @@ class _ManageScreenState extends State<ManageScreen> {
                                 print("전화번호: ${_phonenum}");
                               }
                             },
-                            child: Text("등록"),
+                            child: Text(
+                              "등록",
+                              style: TextStyle(color: Color(0xffffffff)),
+                            ),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Color(0xff6528F7)),
                           ),

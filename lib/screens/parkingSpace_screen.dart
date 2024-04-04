@@ -160,7 +160,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                     child: Row(
                       children: [
                         Icon(Icons.location_pin),
-                        Spacer(flex: 1),
+                        Spacer(flex: 2),
                         Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                         Spacer(flex: 20),
                         if (_preEdit == false)
@@ -186,7 +186,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                   Container(
                     // 날짜 및 시각 선택
                     height: 30,
-                    margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                    margin: EdgeInsets.fromLTRB(15, 25, 25, 0),
                     child: Row(children: [
                       IconButton(
                         padding: EdgeInsets.zero,
@@ -197,7 +197,7 @@ class _ParkingSpaceScreenState extends State<ParkingSpaceScreen> {
                           selectedDate.value = true;
                         },
                       ),
-                      Spacer(flex: 1),
+                      //Spacer(flex: 1),
                       InkWell(
                           onTap: () {
                             selectedDate.value = true;
@@ -452,7 +452,7 @@ class _PreReservationState extends State<PreReservation> {
                         child: Row(
                           children: [
                             Icon(Icons.location_pin),
-                            Spacer(flex: 1),
+                            Spacer(flex: 2),
                             Text("$_parkingLot"), // 검색 시 선택한 주차장 이름 받아옴
                             Spacer(flex: 20),
                             if (_preEdit == false)
@@ -479,7 +479,7 @@ class _PreReservationState extends State<PreReservation> {
                       Container(
                         // 날짜 및 시각 선택
                         height: 30,
-                        margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                        margin: EdgeInsets.fromLTRB(15, 25, 25, 0),
                         child: Row(children: [
                           IconButton(
                             padding: EdgeInsets.zero,
@@ -495,7 +495,7 @@ class _PreReservationState extends State<PreReservation> {
                                               ValueNotifier<bool>(true))));
                             },
                           ),
-                          Spacer(flex: 1),
+                          //Spacer(flex: 1),
                           InkWell(
                               onTap: () {
                                 // 날짜 변경

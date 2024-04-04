@@ -284,17 +284,17 @@ class _SearchScreenState extends State<SearchScreen> {
           centerTitle: true,
           backgroundColor: Color(0xffFFFFFF),
           elevation: 1,
-          //automaticallyImplyLeading: false,
+          automaticallyImplyLeading: false,
           actions: <Widget>[
             IconButton(
                 onPressed: () {
-                  _scaffoldKey.currentState?.openDrawer();
+                  _scaffoldKey.currentState?.openEndDrawer();
                 },
                 icon: Icon(Icons.menu, color: Color(0xff6528F7)))
           ],
         ),
       ),
-      drawer: Drawer(
+      endDrawer: Drawer(
         child: ListView(
           children: [
             ListTile(),
@@ -414,9 +414,13 @@ class _SearchScreenState extends State<SearchScreen> {
                                 print("전화번호: ${_phonenum}");
                               }
                             },
-                            child: Text("등록"),
+                            child: Text(
+                              "등록",
+                              style: TextStyle(color: Color(0xffffffff)),
+                            ),
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xff6528F7)),
+                              backgroundColor: Color(0xff6528F7),
+                            ),
                           ),
                         ],
                       );
