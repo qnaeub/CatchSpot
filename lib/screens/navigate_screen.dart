@@ -36,21 +36,30 @@ class _NavigateScreenState extends State<NavigateScreen> {
   double pitch = 1.0;
   double rate = 0.5;
 
+  // Sensors Plus
+  //List<AccelerometerEvent> _accelerometerValues = [];
+  //late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
+
   @override
   void initState() {
     super.initState();
     initTtsState();
     _getProcessState();
     _setSelectedValue();
-    PrintAcceleration();
+    //_accelerometerSubscription = accelerometerEvents.listen((event) {
+    //  setState(() {
+    //    _accelerometerValues = [event];
+    //  });
+    //});
     //Timer.periodic(Duration(seconds: 1), (timer) {
-    //  PrintAcceleration();
+    //  PrintAccelerometer();
     //});
   }
 
   @override
   void dispose() {
     _unityWidgetController?.dispose();
+    //_accelerometerSubscription.cancel();
     super.dispose();
   }
 
@@ -207,10 +216,13 @@ class _NavigateScreenState extends State<NavigateScreen> {
     flutterTts.speak(voiceText);
   }
 
-  // Senser Plus
-  void PrintAcceleration() {
-    print("x: ${_userAccelerometerEvent?.x}");
-    print("y: ${_userAccelerometerEvent?.y}");
-    print("z: ${_userAccelerometerEvent?.z}");
-  }
+  // Sensors Plus
+  //void PrintAccelerometer() {
+  //  if (_accelerometerValues.isNotEmpty)
+  //    print('X: ${_accelerometerValues[0].x.toStringAsFixed(2)}, '
+  //        'Y: ${_accelerometerValues[0].y.toStringAsFixed(2)}, '
+  //        'Z: ${_accelerometerValues[0].z.toStringAsFixed(2)}');
+  //  else
+  //    print('No data available');
+  //}
 }
