@@ -41,6 +41,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool showSearchResult = false;
   List<String> _preLot = [];
   List<String> _realLot = [];
+  bool _isNaviMode = false;
 
   // STT Setting
   bool _hasSpeech = false;
@@ -90,9 +91,20 @@ class _SearchScreenState extends State<SearchScreen> {
     _getSearchItem();
     _getParkingLot();
     _getProcessState();
+    _setNaviMode();
     initSpeechState();
     initTtsState();
     _getCarAndPhonenum();
+  }
+
+  // 내비게이션 실행하는지 확인
+  _setNaviMode() async {
+    print("#확인# Search Screen - Set Navi Mode Function");
+    setState(() {
+      _isNaviMode = false;
+      _pref.setBool("naviMode", _isNaviMode);
+    });
+    print("#확인# search set _isNaviMode = ${_isNaviMode}");
   }
 
   _setSearchItem() async {

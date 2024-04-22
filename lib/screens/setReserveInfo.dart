@@ -85,11 +85,11 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
   @override
   void initState() {
     super.initState();
-    //_getVoiceReserveMode();
     _getCarAndPhonenum();
     _getParkingLot();
     _getParkingZone();
     _getReserveDate();
+    _getReserveKey();
     _getPreEdit();
     initSpeechState();
     initTtsState();
@@ -181,6 +181,14 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
     });
   }
 
+  _getReserveKey() async {
+    _pref = await SharedPreferences.getInstance();
+    setState(() {
+      _reserveKey = _pref.getString("reservation_key") ?? "";
+    });
+    print("예약번호: ${_reserveKey}");
+  }
+
   _getCarAndPhonenum() async {
     _pref = await SharedPreferences.getInstance();
     setState(() {
@@ -234,7 +242,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         'end_time': end_time,
         'lot_key': _lotKey,
       };
-      print("#################### 실시간 예약 data 설정");
+      print("실시간 예약 data 설정");
     } else {
       data = {
         'vehicle_num': _carnum,
@@ -244,8 +252,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         'lot_key': _lotKey,
         'zone_key': _zoneName,
       };
-      print(
-          "#################### 사전 예약 data 설정\n시작: $start_time\n종료: $end_time\n구역: $_zoneName");
+      print("사전 예약 data 설정\n시작: $start_time\n종료: $end_time\n구역: $_zoneName");
     }
 
     try {
@@ -259,18 +266,18 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
       Map<String, dynamic> jsonResponse = response.data;
 
       if (response.statusCode == 200) {
-        print('#################### _setReserve() 데이터 전송 성공');
+        print('_setReserve() 데이터 전송 성공');
         setState(() {
           _reserveKey = jsonResponse['예약 번호'];
           _pref.setString("reservation_key", _reserveKey);
         });
-        //print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
+        print("데이터 전송 성공: 예약 번호 ${_reserveKey}");
         print("데이터 전송 성공: ${jsonResponse}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print("#################### _setReserve() 에러: ${e}");
+      print("_setReserve() 에러: ${e}");
     }
   }
 
@@ -282,37 +289,35 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         _datetime.hour,
         _datetime.minute));
     String end_time = DateFormat("yyyy-MM-dd HH:mm:ss").format(endDateTime);
+    print("start_time: ${start_time}\nend_time: ${end_time}");
 
-    Map<String, dynamic>? data;
-    if (_preEdit) {
-      data = {
-        'reservation_key': _reserveKey,
-        'start_time': start_time,
-        'end_time': end_time,
-        'lot_key': _lotKey,
-        'zone_key': _zoneName,
-      };
-    }
+    Map<String, dynamic>? data = {
+      'reservation_key': _reserveKey,
+      'start_time': start_time,
+      'end_time': end_time,
+      'lot_key': _lotKey,
+      'zone_key': _zoneName,
+    };
+    print("data: ${data}");
 
     try {
-      var response;
-      if (_preEdit) {
-        response = await put('/reservation/preupdate', data);
-      } else {
-        response = await put('/reservation/realtimeupdate', data);
-      }
+      var response = await put('/reservation/update2', data);
+      //var response;
+      //if (_preEdit) {
+      //  response = await put('/reservation/preupdate', data);
+      //} else {
+      //  response = await put('/reservation/realtimeupdate', data);
+      //}
       Map<String, dynamic> jsonResponse = response.data;
 
       if (response.statusCode == 200) {
-        print(
-            '#################### _editReserve() 데이터 전송 성공 ####################');
+        print('_editReserve() 데이터 전송 성공');
         print("결과: ${jsonResponse['결과']}");
       } else {
         print('데이터 전송 실패');
       }
     } catch (e) {
-      print(
-          "#################### _editReserve() 데이터 전송 실패: ${e} ####################");
+      print("_editReserve() 데이터 전송 실패: ${e}");
     }
   }
 
@@ -408,7 +413,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                         Container(
                           // 날짜 및 시각 선택
                           height: 30,
-                          margin: EdgeInsets.fromLTRB(25, 25, 25, 0),
+                          margin: EdgeInsets.fromLTRB(13, 25, 25, 0),
                           child: Row(children: [
                             IconButton(
                               padding: EdgeInsets.zero,
@@ -428,7 +433,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                   "${DateFormat("yyyy.MM.dd HH:mm").format(DateTime.utc(_datetime.year, _datetime.month, _datetime.day, _datetime.hour, _datetime.minute))}"),
                               //Text("${_datetime.year}.${_datetime.month}.${_datetime.day} ${_datetime.hour}:${_datetime.minute}")
                             ],
-                            Spacer(flex: 10),
+                            Spacer(flex: 1000),
                           ]),
                         ),
                         if (isRealTime.value == false) ...[
@@ -532,7 +537,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             width: 270,
                             height: 35,
                             margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                            padding: EdgeInsets.fromLTRB(10, 13, 10, 0),
                             decoration: BoxDecoration(
                                 color: Color(0xffFFFFFF),
                                 border: Border.all(
@@ -575,7 +580,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                             width: 270,
                             height: 35,
                             margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                            padding: EdgeInsets.fromLTRB(10, 15, 10, 0),
+                            padding: EdgeInsets.fromLTRB(10, 13, 10, 0),
                             decoration: BoxDecoration(
                                 color: Color(0xffFFFFFF),
                                 border: Border.all(
@@ -673,7 +678,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
                                   "종료 시간 (formatted): ${DateFormat("yyyy.MM.dd HH:mm").format(endDateTime)}");
 
                               // 예약 서버 전송
-                              //_setReserve();
+                              _setReserve();
 
                               // 예약 완료 페이지로 이동
                               Navigator.pushNamed(context, '/finish-reserve');
@@ -801,7 +806,7 @@ class _SetReserveInfoState extends State<SetReserveInfo> {
         _setProcessState();
 
         // 예약 서버 전송
-        //_setReserve();
+        _setReserve();
 
         // 예약 완료 페이지로 이동
         Navigator.pushNamed(context, '/finish-reserve');

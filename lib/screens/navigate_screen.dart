@@ -27,6 +27,8 @@ class _NavigateScreenState extends State<NavigateScreen> {
   String _zoneName = "";
   String selectedValue = '0';
 
+  bool _isNaviMode = false;
+
   // TTS Setting
   FlutterTts flutterTts = FlutterTts();
   String language = "ko-KR";
@@ -36,30 +38,17 @@ class _NavigateScreenState extends State<NavigateScreen> {
   double pitch = 1.0;
   double rate = 0.5;
 
-  // Sensors Plus
-  //List<AccelerometerEvent> _accelerometerValues = [];
-  //late StreamSubscription<AccelerometerEvent> _accelerometerSubscription;
-
   @override
   void initState() {
     super.initState();
     initTtsState();
     _getProcessState();
     _setSelectedValue();
-    //_accelerometerSubscription = accelerometerEvents.listen((event) {
-    //  setState(() {
-    //    _accelerometerValues = [event];
-    //  });
-    //});
-    //Timer.periodic(Duration(seconds: 1), (timer) {
-    //  PrintAccelerometer();
-    //});
   }
 
   @override
   void dispose() {
     _unityWidgetController?.dispose();
-    //_accelerometerSubscription.cancel();
     super.dispose();
   }
 
@@ -69,6 +58,7 @@ class _NavigateScreenState extends State<NavigateScreen> {
     setState(() {
       _processState = _pref.getString("processState") ?? "";
     });
+    _setNaviMode();
   }
 
   // 안내할 주차장 선택하기
@@ -119,33 +109,48 @@ class _NavigateScreenState extends State<NavigateScreen> {
     flutterTts.setSpeechRate(rate);
   }
 
+  // 내비게이션 실행하는지 확인
+  _setNaviMode() async {
+    if (_processState == "예약완료" || _processState == "주차완료") // 수정하기: 예약완료->입차완료
+      setState(() {
+        _isNaviMode = true;
+        _pref.setBool("naviMode", _isNaviMode);
+      });
+    print("#확인# set _isNaviMode = ${_isNaviMode}");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50),
-        child: AppBar(
-          title: Text(
-            '내비게이션',
-            style: TextStyle(color: Color(0xff6528F7)),
-          ),
-          centerTitle: true,
-          backgroundColor: Color(0xffFFFFFF),
-          elevation: 1,
-          automaticallyImplyLeading: false,
-        ),
-      ),
+      appBar: _isNaviMode == true
+          ? PreferredSize(
+              preferredSize: Size.fromHeight(0),
+              child: Container(),
+            )
+          : PreferredSize(
+              preferredSize: Size.fromHeight(50),
+              child: AppBar(
+                title: Text(
+                  '내비게이션',
+                  style: TextStyle(color: Color(0xff6528F7)),
+                ),
+                centerTitle: true,
+                backgroundColor: Color(0xffFFFFFF),
+                elevation: 1,
+                automaticallyImplyLeading: false,
+              ),
+            ),
       body:
           _processState == "예약완료" || _processState == "주차완료" // 수정하기: 예약완료->입차완료
               ? SafeArea(
                   // new
                   bottom: false,
-                  child: WillPopScope(
-                    onWillPop: () async {
-                      // Pop the category page if Android back button is pressed.
-                      return true;
-                    },
+                  child: PopScope(
+                    //onWillPop: () async {
+                    // Pop the category page if Android back button is pressed.
+                    //return true;
+                    //},
                     child: Container(
                       color: Colors.black,
                       child: UnityWidget(
@@ -215,14 +220,4 @@ class _NavigateScreenState extends State<NavigateScreen> {
   Future _speak(voiceText) async {
     flutterTts.speak(voiceText);
   }
-
-  // Sensors Plus
-  //void PrintAccelerometer() {
-  //  if (_accelerometerValues.isNotEmpty)
-  //    print('X: ${_accelerometerValues[0].x.toStringAsFixed(2)}, '
-  //        'Y: ${_accelerometerValues[0].y.toStringAsFixed(2)}, '
-  //        'Z: ${_accelerometerValues[0].z.toStringAsFixed(2)}');
-  //  else
-  //    print('No data available');
-  //}
 }
