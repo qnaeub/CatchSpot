@@ -473,17 +473,19 @@ class _SearchScreenState extends State<SearchScreen> {
                     },
                     iconSize: 25.0,
                   ),
-                  SizedBox(
-                    width: 200.0,
-                    child: TextField(
-                      cursorColor: Color(0xffA076F9),
-                      controller: textController,
-                      style: TextStyle(),
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                      ),
-                    ),
-                  ),
+                  Container(
+                      padding: EdgeInsets.fromLTRB(0, 0, 0, 7),
+                      child: SizedBox(
+                        width: 200.0,
+                        child: TextField(
+                          cursorColor: Color(0xffA076F9),
+                          controller: textController,
+                          style: TextStyle(),
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      )),
                   IconButton(
                     icon: Icon(Icons.search),
                     onPressed: () async {

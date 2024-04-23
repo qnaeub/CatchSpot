@@ -180,7 +180,6 @@ class _ManageScreenState extends State<ManageScreen> {
     setState(() {
       _reserveKey = _pref.getString("reservation_key") ?? "";
     });
-    print("예약번호: ${_reserveKey}");
   }
 
   @override
@@ -250,7 +249,9 @@ class _ManageScreenState extends State<ManageScreen> {
           ],
         ),
       );
-    } else if (_processState == "예약완료" || _processState == "주차완료") {
+    } else if (_processState == "예약완료" ||
+        _processState == "입차완료" ||
+        _processState == "주차완료") {
       childWidget = Column(
         children: <Widget>[
           Expanded(
@@ -507,7 +508,7 @@ class _ManageScreenState extends State<ManageScreen> {
                       ),
                     ],
                   ),
-                  if (_processState == "입차완료")
+                  if (_processState == "예약완료") // 수정하기 : 예약완료 -> 입차완료
                     Stack(
                       children: [
                         Container(
@@ -530,6 +531,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                     InkWell(
                                       onTap: () {
                                         // 차단기 올림
+                                        print("차단기 올림 버튼");
                                       },
                                       child: Container(
                                         width: 130,
@@ -551,6 +553,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                     InkWell(
                                       onTap: () {
                                         // 차단기 내림
+                                        print("차단기 내림 버튼");
                                       },
                                       child: Container(
                                         width: 130,
@@ -576,15 +579,15 @@ class _ManageScreenState extends State<ManageScreen> {
                           ),
                         ),
                         Positioned(
-                          top: 15,
+                          top: 10,
                           left: 50,
                           child: Container(
-                            width: 130,
+                            width: 110,
                             decoration: BoxDecoration(
                               color: Color(0xffFFFFFF),
                             ),
                             child: Text(
-                              "Controller",
+                              " Controller",
                               style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,

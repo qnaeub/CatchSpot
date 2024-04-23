@@ -161,7 +161,21 @@ class _NavigateScreenState extends State<NavigateScreen> {
                     ),
                   ),
                 )
-              : Center(child: Text("주차장 내에서 이용 가능한 기능입니다")),
+              : Center(
+                  child: Container(
+                      margin: EdgeInsets.fromLTRB(0, 250, 0, 0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            child: Icon(
+                              Icons.local_parking,
+                              size: 100,
+                            ),
+                          ),
+                          Text(''),
+                          Text("주차장 내에서 이용 가능한 기능입니다."),
+                        ],
+                      ))),
       bottomNavigationBar: MenuBottom(0),
     );
   }
