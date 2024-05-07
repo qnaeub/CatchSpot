@@ -108,7 +108,21 @@ class _FinishReserveState extends State<FinishReserve> {
           automaticallyImplyLeading: false,
         ),
       ),
-      body: Center(child: Text("예약이 완료되었습니다")),
+      body: Center(
+          child: Container(
+              margin: EdgeInsets.fromLTRB(0, 250, 0, 0),
+              child: Column(
+                children: [
+                  SizedBox(
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 100,
+                    ),
+                  ),
+                  Text(''),
+                  Text("예약이 완료되었습니다."),
+                ],
+              ))),
       bottomNavigationBar: MenuBottom(1),
     );
   }

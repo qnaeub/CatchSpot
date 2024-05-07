@@ -116,6 +116,70 @@ class _ManageScreenState extends State<ManageScreen> {
     }
   }
 
+  // 차단기 올림 서버 전송
+  Future<void> _gateOn() async {
+    Map<String, dynamic>? data = {
+      'reservation_key': _reserveKey,
+    };
+    print("_gateOn() data: ${data}");
+
+    try {
+      var response = await post('/set_pre_on', data);
+      Map<String, dynamic> jsonResponse = response.data;
+
+      if (response.statusCode == 200) {
+        print('_gateOn() 데이터 전송 성공');
+        print("결과: ${jsonResponse['결과']}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("_gateOn() 데이터 전송 실패: ${e}");
+    }
+  }
+
+  // 차단기 내림 서버 전송
+  Future<void> _gateOff() async {
+    Map<String, dynamic>? data = {
+      'reservation_key': _reserveKey,
+    };
+    print("_gateOff() data: ${data}");
+
+    try {
+      var response = await post('/set_pre_off', data);
+      Map<String, dynamic> jsonResponse = response.data;
+
+      if (response.statusCode == 200) {
+        print('_gateOff() 데이터 전송 성공');
+        print("결과: ${jsonResponse['결과']}");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("_gateOff() 데이터 전송 실패: ${e}");
+    }
+  }
+
+  // 진행상태 받아오기
+  Future<void> _getState() async {
+    try {
+      var response = await get2('/reservation/confirm/$_reserveKey');
+      Map<String, dynamic> jsonResponse = response.data;
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _processState = jsonResponse['진행상태'];
+          _pref.setString("processState", _processState);
+        });
+        print("진행상태: $_processState");
+      } else {
+        print('데이터 전송 실패');
+      }
+    } catch (e) {
+      print("_getState() 데이터 전송 실패: ${e}");
+    }
+  }
+
   _setPreEdit() {
     setState(() {
       _preEdit = true;
@@ -173,6 +237,7 @@ class _ManageScreenState extends State<ManageScreen> {
     setState(() {
       _processState = _pref.getString("processState") ?? "";
     });
+    if (_processState != "") _getState();
   }
 
   _getReserveKey() async {
@@ -481,7 +546,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                 children: [
                                   Icon(Icons.check_circle),
                                   Spacer(flex: 1),
-                                  Text("${_processState}"),
+                                  Text("$_processState"),
                                   Spacer(flex: 20),
                                 ],
                               ),
@@ -508,7 +573,8 @@ class _ManageScreenState extends State<ManageScreen> {
                       ),
                     ],
                   ),
-                  if (_processState == "예약완료") // 수정하기 : 예약완료 -> 입차완료
+                  if (_processState == "입차완료" ||
+                      _processState == "주차완료") // 수정하기 : 예약완료 -> 입차완료
                     Stack(
                       children: [
                         Container(
@@ -530,30 +596,27 @@ class _ManageScreenState extends State<ManageScreen> {
                                   children: <Widget>[
                                     InkWell(
                                       onTap: () {
-                                        // 차단기 올림
-                                        print("차단기 올림 버튼");
-                                      },
-                                      child: Container(
-                                        width: 130,
-                                        decoration: BoxDecoration(
-                                          color: Color(0xffFFFFFF),
-                                          border: Border.all(
-                                              color: Color(0xffA076F9),
-                                              width: 1),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Center(
-                                            child: Text(
-                                          "차단기\n올림",
-                                          textAlign: TextAlign.center,
-                                        )),
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () {
                                         // 차단기 내림
-                                        print("차단기 내림 버튼");
+                                        _gateOn();
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                                title: Center(
+                                                    child: Text('차단기 내림',
+                                                        style: TextStyle(
+                                                            fontSize: 25,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                                0xff6528F7)))),
+                                                content: Container(
+                                                  child: Image.asset(
+                                                      'assets/gateOn.gif'),
+                                                ));
+                                          },
+                                        );
                                       },
                                       child: Container(
                                         width: 130,
@@ -568,6 +631,47 @@ class _ManageScreenState extends State<ManageScreen> {
                                         child: Center(
                                             child: Text(
                                           "차단기\n내림",
+                                          textAlign: TextAlign.center,
+                                        )),
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () {
+                                        // 차단기 올림
+                                        _gateOff();
+                                        showDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          builder: (BuildContext context) {
+                                            return AlertDialog(
+                                                title: Center(
+                                                    child: Text('차단기 올림',
+                                                        style: TextStyle(
+                                                            fontSize: 25,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: Color(
+                                                                0xff6528F7)))),
+                                                content: Container(
+                                                  child: Image.asset(
+                                                      'assets/gateOff.gif'),
+                                                ));
+                                          },
+                                        );
+                                      },
+                                      child: Container(
+                                        width: 130,
+                                        decoration: BoxDecoration(
+                                          color: Color(0xffFFFFFF),
+                                          border: Border.all(
+                                              color: Color(0xffA076F9),
+                                              width: 1),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                        ),
+                                        child: Center(
+                                            child: Text(
+                                          "차단기\n올림",
                                           textAlign: TextAlign.center,
                                         )),
                                       ),
