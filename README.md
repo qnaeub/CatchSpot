@@ -1,16 +1,54 @@
-# flutter_app
+# 🚗 CatchSpot
+**사용자 중심의 스마트 주차 예약 시스템 🅿️**
 
-A new Flutter project.
+> **"CatchSpot은 주차 예약부터 AR 실내 경로 안내, 그리고 개별 주차면의 IoT 차단기 제어까지 한 번에 제공하는 스마트 주차 통합 솔루션입니다."**
 
-## Getting Started
+CatchSpot은 Flutter와 Unity AR 엔진을 결합하여 주차 경험을 혁신하는 스마트 예약 솔루션입니다.
 
-This project is a starting point for a Flutter application.
+앱을 통해 주차장의 빈 자리와 예약 가능 구역을 확인하고 원하는 시간에 예약할 수 있으며, 운전 중 STT/TTS 기반의 음성 인터랙션을 통해 안전한 핸즈프리 예약을 지원합니다.
 
-A few resources to get you started if this is your first Flutter project:
+주차장 진입 시에는 AR 내비게이션이 예약된 위치 또는 빈 구역까지 정밀하게 안내하며, 예약한 구역에 설치된 스마트 IoT 차단기는 번호판 인식을 통해 자동으로 개폐되거나 앱을 통한 수동 원격 제어를 모두 지원하여 완벽한 주차 예약을 보장합니다.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📱 프로젝트 개요
+
+- **프로젝트명**: 사용자 중심의 스마트 주차 예약 시스템: CatchSpot 
+- **수행 구분**: 졸업 프로젝트 / 팀 프로젝트 (팀장)
+- **담당 역할**: 모바일 애플리케이션 개발 (Flutter & Unity 통합)
+- **개발 기간**: 2023.09 ~ 2024.05
+- **소개 영상**: [YouTube에서 보기 (클릭)](https://youtube.com/shorts/Jv-WbuWHaMc?si=VXlisOUoPgB38Hyy)
+- **시연 영상**: [YouTube에서 보기 (클릭)]()
+
+## 💡 핵심 기능
+
+### 1. AR 실내 내비게이션
+- **Unity 임베딩**: `flutter_unity_widget`을 활용하여 Flutter 앱 내부에서 Unity AR 화면을 렌더링.
+- **실시간 경로 안내**: 복잡한 실내 주차장에서 빈 자리까지의 최적 경로를 AR 가이드라인으로 시각화.
+
+### 2. 스마트 IoT 원격 제어
+- **차단기 제어**: `Dio`/`Http` 통신을 통해 앱 버튼 클릭 시 서버를 거쳐 아두이노(차단기)를 제어.
+- **실시간 상태 모니터링**: 주차면의 점유 여부(만차/공차) 데이터를 실시간으로 수신하여 앱 UI에 표시.
+
+### 3. 음성 인터랙션 (STT & TTS)
+- **핸즈프리 제어**: 운전 중 안전을 위해 `speech_to_text`를 도입, 음성 명령만으로 앱 기능 제어 가능.
+- **음성 안내**: `flutter_tts`를 활용하여 주차 안내 메시지 및 시스템 상태를 음성으로 피드백.
+
+### 4. 예약 및 권한 관리
+- **편의 기능**: `table_calendar`와 `time_picker_spinner`를 커스텀하여 직관적인 주차 예약 UX 제공.
+- **권한 관리**: `permission_handler`를 통해 카메라(AR용), 마이크(음성용), 위치 권한 요청 로직을 체계적으로 구현.
+
+## 🛠 기술 스택
+
+| 구분 | 기술 | 설명 |
+| --- | --- | --- |
+| **Framework** | Flutter (Dart) | 크로스 플랫폼 모바일 애플리케이션 개발 |
+| **AR Engine** | Unity 3D (C#) | Unity 기반 AR 내비게이션 경로 렌더링 |
+| **State Mgt** | Provider | 효율적인 앱 상태 관리 및 비즈니스 로직 분리 |
+| **Networking** | Dio, Http | RESTful API 서버 통신 |
+| **Voice Tech** | STT, TTS | 사용자 음성 인식 및 음성 안내 기능 구현 |
+| **Sensors** | Sensors Plus | 디바이스의 방향 및 움직임 감지 |
+
+---
+
+*Created by **이유비** | Contact: haha52ns@gmail.com*
