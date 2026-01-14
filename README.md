@@ -51,4 +51,4 @@ CatchSpot은 Flutter와 Unity AR 엔진을 결합하여 주차 경험을 혁신�
 
 ---
 
-*Created by **이유비** | Contact: haha52ns@gmail.com*
+*Created by **이유비** | Contact: eo2jdkk@gmail.com*
