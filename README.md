@@ -18,7 +18,7 @@ CatchSpot은 Flutter와 Unity AR 엔진을 결합하여 주차 경험을 혁신�
 - **담당 역할**: 모바일 애플리케이션 개발 (Flutter & Unity 통합)
 - **개발 기간**: 2023.09 ~ 2024.05
 - **소개 영상**: [YouTube에서 보기 (클릭)](https://youtube.com/shorts/Jv-WbuWHaMc?si=VXlisOUoPgB38Hyy)
-- **시연 영상**: [YouTube에서 보기 (클릭)]()
+- **시연 영상**: [YouTube에서 보기 (클릭)](https://youtu.be/NiBxEZE423c)
 
 ## 💡 핵심 기능
 
@@ -37,6 +37,9 @@ CatchSpot은 Flutter와 Unity AR 엔진을 결합하여 주차 경험을 혁신�
 ### 4. 예약 및 권한 관리
 - **편의 기능**: `table_calendar`와 `time_picker_spinner`를 커스텀하여 직관적인 주차 예약 UX 제공.
 - **권한 관리**: `permission_handler`를 통해 카메라(AR용), 마이크(음성용), 위치 권한 요청 로직을 체계적으로 구현.
+
+## 📂 서비스 구조
+![CatchSpot User Flow](https://github.com/user-attachments/assets/51dee403-4f0f-4247-9f5b-0459c5c96384)
 
 ## 🛠 기술 스택
 
